@@ -1,0 +1,22 @@
+subprojects {
+    apply plugin : 'java'
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        testCompile 'org.testng:testng:6.1.1'
+    }
+    test {
+        useTestNG() {
+        }
+    }
+
+}
+
+task docs(type: Javadoc) {
+    source subprojects.collect {project -> project.sourceSets.main.allJava }
+    destinationDir = new File(buildDir,'doc')
+    // Might need a classpath
+    classpath = files(subprojects.collect {project ->
+        project.sourceSets.main.compileClasspath})
+}
