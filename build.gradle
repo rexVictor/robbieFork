@@ -20,3 +20,9 @@ task docs(type: Javadoc) {
     classpath = files(subprojects.collect {project ->
         project.sourceSets.main.compileClasspath})
 }
+
+project(':model') {
+    dependencies {
+        compile project(':api')
+    }
+}
