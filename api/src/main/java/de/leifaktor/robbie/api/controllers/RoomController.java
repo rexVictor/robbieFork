@@ -74,6 +74,17 @@ public interface RoomController {
      * @param creature the creature to spewn
      */
     void spawn(FieldController field, CreatureController creature);
+
+    /**
+     * Stops all creatures on this room.
+     */
+    void freeze();
+
+    /**
+     * Resumes all creatuers on this room.
+     */
+    void unfreeze();
+
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

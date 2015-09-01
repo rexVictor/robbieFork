@@ -36,5 +36,12 @@ public interface Creature {
      */
     boolean canCollect(Item item);
 
+    /**
+     * Returns the speed object of this creature.
+     *
+     * @return the speed object
+     */
+    Speed getSpeed();
+
 }
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

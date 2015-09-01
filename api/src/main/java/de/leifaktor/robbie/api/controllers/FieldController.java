@@ -70,6 +70,16 @@ public interface FieldController {
      */
     Direction isNextTo(FieldController fieldController);
 
+    /**
+     * Stops all creatures on this field.
+     */
+    void freeze();
+
+    /**
+     * Resumes all creatuers on his field.
+     */
+    void unfreeze();
+
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
