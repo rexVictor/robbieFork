@@ -68,9 +68,7 @@ public class RoomImpl implements Room {
      * @throws IndexOutOfBoundsException if layers is empty or width or height is not positive.
      */
     public RoomImpl(long id, int width, int height, List<Layer> layers) {
-        // checks if layers is null or empty
-        layers.get(0);
-        if (width <= 0 || height <= 0) {
+        if (layers.isEmpty() || width <= 0 || height <= 0) {
             throw new IndexOutOfBoundsException();
         }
         this.id = id;

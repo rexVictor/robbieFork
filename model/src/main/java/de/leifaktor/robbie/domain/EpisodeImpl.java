@@ -57,7 +57,9 @@ public class EpisodeImpl implements Episode {
      * @throws IndexOutOfBoundsException if floors is empty.
      */
     public EpisodeImpl(long id, List<Floor> floors) {
-        floors.get(0);
+        if (floors.isEmpty()) {
+            throw new IndexOutOfBoundsException();
+        }
         this.id = id;
         this.floors = floors;
     }

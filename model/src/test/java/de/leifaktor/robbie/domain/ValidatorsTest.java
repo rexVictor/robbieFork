@@ -22,6 +22,7 @@
 
 package de.leifaktor.robbie.domain;
 
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.util.ArrayList;
@@ -74,6 +75,23 @@ public class ValidatorsTest {
         list.add(subList2);
         Validators.requireNonNullAndSameSize(list);
     }
+
+    @Test
+    public void requireNonNullAndSameSize_TwoTimesTwoMatrix() {
+        List<List<Integer>> list = new ArrayList<>();
+        List<Integer> subList1 = Arrays.asList(0,1);
+        List<Integer> subList2 = Arrays.asList(2,3);
+        list.add(subList1);
+        list.add(subList2);
+        List<List<Integer>> valid = Validators.requireNonNullAndSameSize(list);
+        Assert.assertSame(valid, list);
+    }
+
+    @Test
+    public void testValidatorsIsUtilityClass() throws Exception {
+        TestHelper.assertUtilityClassWellDefined(Validators.class);
+    }
+
 
 }
 
