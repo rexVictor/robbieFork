@@ -1,14 +1,54 @@
-subprojects {
-    apply plugin : 'java'
+plugins {
+    id "org.sonarqube" version "1.0"
+}
+
+
+
+allprojects {
     repositories {
         mavenCentral()
     }
+    sonarqube {
+        properties {
+            property "sonar.jdbc.username", "sonarqube"
+            property "sonar.jdbc.password", "sonarqube"
+            property "sonar.jdbc.url","jdbc:postgresql://rexis-server/sonarqube"
+            property "sonar.jacoco.reportPath", "$buildDir/jacoco/jacocoTest.exec"
+        }
+    }
+}
+
+
+subprojects {
+    apply plugin : 'java'
+    apply plugin : 'checkstyle'
+    apply plugin : 'findbugs'
+    apply plugin : 'jacoco'
+
     dependencies {
-        testCompile 'org.testng:testng:6.1.1'
+        testCompile "org.testng:testng:+"
+        compile "org.slf4j:slf4j-api:+"
+        compile "ch.qos.logback:logback-classic:+"
     }
     test {
         useTestNG() {
         }
+        jacoco {
+            destinationFile = file("$buildDir/jacoco/jacocoTest.exec")
+        }
+        testLogging {
+            showStandardStreams = true
+        }
+    }
+
+    checkstyle {
+        toolVersion = "6.8"
+        configFile = new File(rootDir, "config/checkstyle/checkstyle.xml")
+    }
+
+    findbugs {
+        effort = "max"
+        reportLevel = "low"
     }
 
 }
@@ -26,3 +66,11 @@ project(':model') {
         compile project(':api')
     }
 }
+
+project(':controllers') {
+    dependencies {
+        compile project(':api')
+        testCompile project(':testes')
+    }
+}
+// vim:set shiftwidth=4 softtabstop=4 expandtab:
