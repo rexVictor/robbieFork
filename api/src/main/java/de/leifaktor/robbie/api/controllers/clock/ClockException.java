@@ -20,7 +20,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package de.leifaktor.robbie.api.controllers;
+package de.leifaktor.robbie.api.controllers.clock;
 
 /**
  * Thrown whenever a clock doos something wrong.

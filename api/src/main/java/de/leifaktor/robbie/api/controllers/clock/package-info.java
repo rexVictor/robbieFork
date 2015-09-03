@@ -20,30 +20,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package de.leifaktor.robbie.api.controllers;
-
 /**
- * This describes how to handle Exceptions in a clock.
+ * Provides interfaces for the controllers.
  *
- * <p>Implementations get called, when an exception in a clock happes.
+ * <p>The purpuse of the controllers is to handle all events and
+ * keep server (the model)  and the clients (the GUI) synchronized.
  */
-public interface ClockRestorer {
+package de.leifaktor.robbie.api.controllers.clock;
 
-    /**
-     * Gets called, when an exception in the clock occured.
-     *
-     * <p>This method must stop the clock and restart it, after
-     * handling the exception or rethrow the exception.
-     *
-     * <p>Usually this should call clock.state() which will throw the
-     * occured exception.
-     *
-     * <p>Note: This method can be run in its own thread.
-     *
-     * @param clock the clock which threw the exception
-     */
-    void exceptionHappened(Clock clock);
 
-}
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

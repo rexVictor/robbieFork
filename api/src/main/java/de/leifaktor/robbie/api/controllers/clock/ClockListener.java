@@ -20,7 +20,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package de.leifaktor.robbie.api.controllers;
+package de.leifaktor.robbie.api.controllers.clock;
 
 /**
  * A ClockListener provides callback methods for a clock object.

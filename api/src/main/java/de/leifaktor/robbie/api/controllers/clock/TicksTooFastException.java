@@ -20,7 +20,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package de.leifaktor.robbie.api.controllers;
+package de.leifaktor.robbie.api.controllers.clock;
+
+import de.leifaktor.robbie.api.controllers.clock.ClockException;
 
 /**
  * Indicates that one tick is too fast.

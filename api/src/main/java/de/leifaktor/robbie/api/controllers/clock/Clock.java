@@ -20,7 +20,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package de.leifaktor.robbie.api.controllers;
+package de.leifaktor.robbie.api.controllers.clock;
 
 import java.util.concurrent.TimeUnit;
 
@@ -44,18 +44,6 @@ public interface Clock {
      * @throws NullPointerException if listener is null
      */
     void addClockListener(ClockListener listener);
-
-    /**
-     * Adds a ClockListener to this clock.
-     *
-     * <p>ClockListeners added via this method will be called every
-     * count ticks.
-     *
-     * @param count the number of ticks to skip
-     * @param listener the Clocklistener to be registered
-     * @throws NullPointerException if listener is null
-     */
-    void addClockListener(long count, ClockListener listener);
 
     /**
      * Sets the duration of a tick.
