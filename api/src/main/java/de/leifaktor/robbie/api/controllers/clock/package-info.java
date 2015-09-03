@@ -21,9 +21,9 @@
  */
 
 /**
- * Provides interfaces for the controllers.
+ * Provides interfaces for the clock.
  *
- * <p>The purpuse of the controllers is to handle all events and
+ * <p>The purpose of the controllers is to handle all events and
  * keep server (the model)  and the clients (the GUI) synchronized.
  */
 package de.leifaktor.robbie.api.controllers.clock;

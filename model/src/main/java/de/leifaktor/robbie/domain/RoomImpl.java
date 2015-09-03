@@ -43,7 +43,7 @@ public class RoomImpl implements Room {
     private final int width;
 
     /**
-     * The number of Fields each coloum in each layer has.
+     * The number of Fields each coloumn in each layer has.
      */
     private final int height;
 

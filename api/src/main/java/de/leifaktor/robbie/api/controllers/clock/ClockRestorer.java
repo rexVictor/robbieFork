@@ -25,18 +25,18 @@ package de.leifaktor.robbie.api.controllers.clock;
 /**
  * This describes how to handle Exceptions in a clock.
  *
- * <p>Implementations get called, when an exception in a clock happes.
+ * <p>Implementations get called, when an exception in a clock happens.
  */
 public interface ClockRestorer {
 
     /**
-     * Gets called, when an exception in the clock occured.
+     * Gets called, when an exception in the clock occurred.
      *
      * <p>This method must stop the clock and restart it, after
      * handling the exception or rethrow the exception.
      *
      * <p>Usually this should call clock.state() which will throw the
-     * occured exception.
+     * occurred exception.
      *
      * <p>Note: This method can be run in its own thread.
      *

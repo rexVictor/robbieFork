@@ -30,7 +30,7 @@ package de.leifaktor.robbie.api.controllers;
  * It provides methods to allow underlying RoomControllers to communicate.
  *
  * <p>Implementations need to synchronize the model and the GUI.
- * They also need to notify other controllers about occured events.
+ * They also need to notify other controllers about occurred events.
  */
 public interface FloorController {
 

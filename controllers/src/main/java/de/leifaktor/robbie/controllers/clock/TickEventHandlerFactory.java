@@ -22,7 +22,7 @@
 
 package de.leifaktor.robbie.controllers.clock;
 
-import de.leifaktor.robbie.api.controllers.ClockListener;
+import de.leifaktor.robbie.api.controllers.clock.ClockListener;
 
 import java.util.Collection;
 
@@ -34,7 +34,7 @@ public interface TickEventHandlerFactory {
 
     /**
      * Creates a new TickEventHandler.
-     * @param listeners the clocklisteners to be notified
+     * @param listeners the ClockListeners to be notified
      * @return a TickEventHandler
      */
     TickEventHandler create(Collection<? extends ClockListener> listeners);

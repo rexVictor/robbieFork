@@ -30,12 +30,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * The testclass for the {@link Direction} enumeration.
+ * The test class for the {@link Direction} enumeration.
  */
 public class DirectionTest {
 
     /**
-     * Constuctor for the test.
+     * Constructor for the test.
      */
     public DirectionTest() {
     }

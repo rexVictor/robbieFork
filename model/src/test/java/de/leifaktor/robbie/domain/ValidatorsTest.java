@@ -27,6 +27,7 @@ import org.testng.annotations.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -69,7 +70,7 @@ public class ValidatorsTest {
     @Test(expectedExceptions = IndexOutOfBoundsException.class)
     public void requireNonNullAndSameSize_subListsNotSameLength() {
         List<List<Integer>> list = new ArrayList<>();
-        List<Integer> subList1 = Arrays.asList(0);
+        List<Integer> subList1 = Collections.singletonList(0);
         List<Integer> subList2 = Arrays.asList(0,1);
         list.add(subList1);
         list.add(subList2);

@@ -43,7 +43,7 @@ public class FloorImpl implements Floor {
     /**
      * A list of list of rooms.
      *
-     * <p> Neiter this list nor its entry lists may be empty or null.
+     * <p>Neither this list nor its entry lists may be empty or null.
      *     All entry list must have the same length.
      */
     private final List<List<Room>> rooms;
@@ -51,7 +51,7 @@ public class FloorImpl implements Floor {
     /**
      * Creates a new Floor with the specified id and the specified rooms.
      *
-     * <p> The id must be unique among all floors of an episode.
+     * <p>The id must be unique among all floors of an episode.
      *
      * @param id unique id among all floors of an Episode. Uniqueness is not checked.
      * @param rooms the rooms this floor has

@@ -23,7 +23,7 @@
 /**
  * The implementation of the model API.
  *
- * <p> This package holds the classes implementing the interfaces
+ * <p>This package holds the classes implementing the interfaces
  * in the de.leifaktor.robbie.api.domain package.
  */
 package de.leifaktor.robbie.domain;

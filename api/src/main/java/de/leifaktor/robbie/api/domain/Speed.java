@@ -57,14 +57,14 @@ public interface Speed {
     /**
      * Returns the minimum speed.
      *
-     * @return the minuum speed
+     * @return the minimum speed
      */
     double getMinimumSpeed();
 
     /**
      * Returns the maximum speed.
      *
-     * @return the minuum speed
+     * @return the maximum speed
      */
     double getMaximumSpeed();
 

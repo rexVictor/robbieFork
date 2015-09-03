@@ -22,8 +22,6 @@
 
 package de.leifaktor.robbie.api.controllers.clock;
 
-import de.leifaktor.robbie.api.controllers.clock.ClockException;
-
 /**
  * Indicates that one tick is too fast.
  *

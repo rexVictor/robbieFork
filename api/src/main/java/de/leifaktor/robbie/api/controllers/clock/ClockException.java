@@ -23,7 +23,7 @@
 package de.leifaktor.robbie.api.controllers.clock;
 
 /**
- * Thrown whenever a clock doos something wrong.
+ * Thrown whenever a clock does something wrong.
  */
 public class ClockException extends Exception {
 

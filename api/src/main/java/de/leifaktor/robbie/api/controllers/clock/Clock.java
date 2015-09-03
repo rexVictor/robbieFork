@@ -27,7 +27,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * A Clock is the time measurement ingame.
  *
- * <p>The smallest timeunit is a tick.
+ * <p>The smallest time unit is a tick.
  *
  * <p>Usually there should be only one Clock instance per Episode.
  *
@@ -40,7 +40,7 @@ public interface Clock {
      *
      * <p>ClockListeners added via this method will be called every tick.
      *
-     * @param listener the Clocklistener to be registered
+     * @param listener the ClockListener to be registered
      * @throws NullPointerException if listener is null
      */
     void addClockListener(ClockListener listener);
@@ -87,7 +87,7 @@ public interface Clock {
      *
      * @return the current tick duration in milliseconds.
      */
-    long getTickDurationinMillis();
+    long getTickDurationInMillis();
 
 }
 

@@ -39,7 +39,7 @@ final class Validators {
     /**
      * Returns the parameter, if it is valid.
      *
-     * <p> It is considered vaild, if it is not null, non of its sublists are null
+     * <p>It is considered valid, if it is not null, non of its sublists are null
      * and none of the entries of the sublist are null.
      *
      * @param lists the list of lists of objects to check.

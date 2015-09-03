@@ -30,7 +30,7 @@ package de.leifaktor.robbie.api.controllers;
  * It provides methods to allow underlying FieldControllers to communicate.
  *
  * <p>Implementations need to synchronize the model and the GUI.
- * They also need to notify other controllers about occured events.
+ * They also need to notify other controllers about occurred events.
  */
 public interface LayerController {
 
@@ -45,7 +45,7 @@ public interface LayerController {
     FieldController getField(int x, int y);
 
     /**
-     * Returns the room conroller, holding this layer.
+     * Returns the room controller, holding this layer.
      *
      * @return the room controller
      */
@@ -57,7 +57,7 @@ public interface LayerController {
     void freeze();
 
     /**
-     * Resumes all creatuers on this layer.
+     * Resumes all creatures on this layer.
      */
     void unfreeze();
 }

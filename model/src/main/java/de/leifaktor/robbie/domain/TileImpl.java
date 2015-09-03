@@ -34,7 +34,7 @@ public abstract class TileImpl implements Tile {
 
 
     /**
-     * Creatates a new Tile.
+     * Creates a new Tile.
      */
     public TileImpl() {
 

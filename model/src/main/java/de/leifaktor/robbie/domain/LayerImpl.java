@@ -35,24 +35,24 @@ import java.util.List;
 public class LayerImpl implements Layer {
 
     /**
-     * A uniqe ID among all layers of a Room.
+     * A unique ID among all layers of a Room.
      */
     private final long id;
 
     /**
      * A list of list of all fields.
      * 
-     * <p> The outer list holds all coloumns and all inner lists have the
+     * <p>The outer list holds all coloumns and all inner lists have the
      * same size.
      *
-     * <p> All lists may be immutable.
+     * <p>All lists may be immutable.
      */
     private final List<List<Field>> fields;
 
     /**
      * Creates a new Layer with the specified id and the specified fields.
      *
-     * <p> The id must be unique among all layers of a room.
+     * <p>The id must be unique among all layers of a room.
      *
      * @param id unique id among all layers of a Room. Uniqueness is not checked.
      * @param fields the fields this layer has

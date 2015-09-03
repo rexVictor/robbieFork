@@ -32,7 +32,7 @@ import de.leifaktor.robbie.api.domain.Direction;
  * It provides methods to allow underlying RoomControllers to communicate.
  *
  * <p>Implementations need to synchronize the model and the GUI.
- * They also need to notify other controllers about occured events.
+ * They also need to notify other controllers about occurred events.
  */
 public interface RoomController {
 
@@ -71,7 +71,7 @@ public interface RoomController {
      * Spawn a new creature.
      *
      * @param field the field the creature is spawned on.
-     * @param creature the creature to spewn
+     * @param creature the creature to spawn
      */
     void spawn(FieldController field, CreatureController creature);
 
@@ -81,7 +81,7 @@ public interface RoomController {
     void freeze();
 
     /**
-     * Resumes all creatuers on this room.
+     * Resumes all creatures on this room.
      */
     void unfreeze();
 

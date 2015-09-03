@@ -42,8 +42,8 @@ public abstract class ItemImpl implements Item {
     /**
      * Creates a new item.
      *
-     * @param id uniqe id among all instances; uniqueness is not checked.
-     * @param weight the weigth of this item
+     * @param id unique id among all instances; uniqueness is not checked.
+     * @param weight the weight of this item
      */
     public ItemImpl(long id, double weight) {
         this.id = id;

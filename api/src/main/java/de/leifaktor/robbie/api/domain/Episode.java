@@ -25,15 +25,14 @@ package de.leifaktor.robbie.api.domain;
 /**
  * Episode describes the variable data of the entire world.
  *
- * <p>
- * It stores all {@link Floor}s.
+ * <p>It stores all {@link Floor}s.
  */
 public interface Episode {
 
     /**
      * Returns the {@code z}-th highest floor of this Episode.
      *
-     * @param z The Floor to get. The highet floor is returned if z equals 0,
+     * @param z The Floor to get. The highest floor is returned if z equals 0,
      *          the second highest if z equals 1, etc.
      * @return the z-th highest floor.
      * @throws IndexOutOfBoundsException if there is no {@code z}-th floor.

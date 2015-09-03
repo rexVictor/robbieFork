@@ -30,8 +30,7 @@ import java.util.List;
 /**
  * Episode describes the variable data of the entire world.
  *
- * <p>
- * It stores all {@link Floor}s.
+ * <p>It stores all {@link Floor}s.
  */
 public class EpisodeImpl implements Episode {
 

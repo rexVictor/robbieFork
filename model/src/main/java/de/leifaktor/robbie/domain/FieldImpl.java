@@ -45,9 +45,9 @@ public class FieldImpl implements Field {
     private final Stack<Item> items = new Stack<>();
 
     /**
-     * The creature currenty on this field.
+     * The creature currently on this field.
      *
-     * <p> There can always only be one creature on one field.
+     * <p>There can always only be one creature on one field.
      */
     private Creature occupant = null;
 
@@ -59,7 +59,7 @@ public class FieldImpl implements Field {
     /**
      * Creates a new field.
      *
-     * @param id a uniqe id among all fields of a layer. Uniqueness is not checked.
+     * @param id a unique id among all fields of a layer. Uniqueness is not checked.
      */
     public FieldImpl(long id) {
         this.id = id;

@@ -29,7 +29,7 @@ import de.leifaktor.robbie.api.domain.Inventory;
  * This defines how to handle a Creature.
  *
  * <p>Implementations need to synchronize the model and the GUI.
- * They also need to notify other controllers about occured events.
+ * They also need to notify other controllers about occurred events.
  */
 public interface CreatureController {
 
@@ -43,7 +43,7 @@ public interface CreatureController {
     Inventory getInventory();
 
     /**
-     * Meves the creature in the given direction.
+     * Moves the creature in the given direction.
      *
      * @param direction the direction this creature shall move
      */

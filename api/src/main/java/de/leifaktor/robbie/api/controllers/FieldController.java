@@ -29,7 +29,7 @@ import de.leifaktor.robbie.api.domain.Direction;
  * This defines how to handle an Field.
  *
  * <p>Implementations need to synchronize the model and the GUI.
- * They also need to notify other controllers about occured events.
+ * They also need to notify other controllers about occurred events.
  */
 public interface FieldController {
 
@@ -55,7 +55,7 @@ public interface FieldController {
     /**
      * Checks if fieldController is next to this.
      *
-     * <p> Specifically: Checks if fieldController controls a field,
+     * <p>Specifically: Checks if fieldController controls a field,
      * which is next to the field controlled by this FieldController.
      *
      * @param fieldController the controller to check if its field
@@ -76,7 +76,7 @@ public interface FieldController {
     void freeze();
 
     /**
-     * Resumes all creatuers on his field.
+     * Resumes all creatures on his field.
      */
     void unfreeze();
 

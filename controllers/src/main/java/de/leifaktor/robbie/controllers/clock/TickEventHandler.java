@@ -37,7 +37,7 @@ public interface TickEventHandler {
     void run();
 
     /**
-     * Properly shutsdown this runnable, if it can.
+     * Properly shuts down this runnable, if it can.
      *
      * <p>Otherwise it forces shutdown and throws the causing exceptions.
      *

@@ -22,7 +22,7 @@
 
 package de.leifaktor.robbie.controllers.clock;
 
-import de.leifaktor.robbie.api.controllers.ClockException;
+import de.leifaktor.robbie.api.controllers.clock.ClockException;
 
 import java.util.Objects;
 

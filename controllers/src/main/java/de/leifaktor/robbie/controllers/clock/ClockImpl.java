@@ -22,10 +22,10 @@
 
 package de.leifaktor.robbie.controllers.clock;
 
-import de.leifaktor.robbie.api.controllers.Clock;
-import de.leifaktor.robbie.api.controllers.ClockException;
-import de.leifaktor.robbie.api.controllers.ClockListener;
-import de.leifaktor.robbie.api.controllers.TicksTooFastException;
+import de.leifaktor.robbie.api.controllers.clock.Clock;
+import de.leifaktor.robbie.api.controllers.clock.ClockException;
+import de.leifaktor.robbie.api.controllers.clock.ClockListener;
+import de.leifaktor.robbie.api.controllers.clock.TicksTooFastException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -112,11 +112,6 @@ public class ClockImpl implements Clock {
     }
 
     @Override
-    public void addClockListener(long count, ClockListener listener) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     public void addClockListener(ClockListener listener) {
         if (tickEventHandler != null) {
             throw new ClockAlreadyStartedException();
@@ -167,7 +162,7 @@ public class ClockImpl implements Clock {
 
     @Override
     public boolean state() throws ClockException {
-        if (!callerHandle.isDone()){
+        if (!callerHandle.isDone()) {
             return true;
         }
         try {
@@ -184,12 +179,22 @@ public class ClockImpl implements Clock {
     }
 
     @Override
-    public long getTickDurationinMillis() {
+    public long getTickDurationInMillis() {
         return tickDurationUnit.toMillis(tickDuration);
     }
 
-    public static ClockException wrapToClockException(ExecutionException execExep) {
-        Throwable cause = execExep.getCause();
+    /**
+     * Wraps the exception in a ClockException.
+     *
+     * <p>If the cause of the exception is of type ClockRuntimeException it returns the causing
+     * ClockException. If the cause of the exception is of type ClockException it simply returns
+     * it. Otherwise it constructs a new ClockException with the cause as cause.
+     *
+     * @param execExcep the executionException to process
+     * @return a ClockException derived from execExcep
+     */
+    public static ClockException wrapToClockException(ExecutionException execExcep) {
+        Throwable cause = execExcep.getCause();
         if (cause instanceof ClockRuntimeException) {
             cause = cause.getCause();
         }
@@ -202,8 +207,8 @@ public class ClockImpl implements Clock {
     /**
      * Sets the tick duration and unit for the given TickEventHandler.
      *
-     * @param tickEventHandler the TickEventHandler to set the duration
-     * @param duration the duraton to set
+     * @param clock the Clock to set the duration
+     * @param duration the duration to set
      * @param unit the unit to set
      * @throws NullPointerException if tickEventHandler or unit is null
      * @throws IllegalArgumentException if duration is negative

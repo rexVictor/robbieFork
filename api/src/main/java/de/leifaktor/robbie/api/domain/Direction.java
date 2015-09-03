@@ -182,7 +182,7 @@ public enum Direction {
     /**
      * Returns the inverted direction of this direction.
      *
-     * <p> e.g. NORTHWEST.invert() == SOUTHEAST, SOUTH.invert() == NORTH
+     * <p>e.g. NORTHWEST.invert() == SOUTHEAST, SOUTH.invert() == NORTH
      * @return the inverted direction.
      */
     public abstract Direction invert();
@@ -194,7 +194,7 @@ public enum Direction {
     public abstract boolean isStraight();
 
     /**
-     * Returns true if and olny if this direction in neither NORTH, SOUTH, EAST nor WEST.
+     * Returns true if and only if this direction in neither NORTH, SOUTH, EAST nor WEST.
      * @return if the direction is diagonal.
      */
     public boolean isDiagonal() {

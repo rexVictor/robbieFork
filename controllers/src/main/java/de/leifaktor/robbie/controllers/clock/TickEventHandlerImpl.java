@@ -22,7 +22,7 @@
 
 package de.leifaktor.robbie.controllers.clock;
 
-import de.leifaktor.robbie.api.controllers.ClockListener;
+import de.leifaktor.robbie.api.controllers.clock.ClockListener;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -65,11 +65,11 @@ public class TickEventHandlerImpl implements TickEventHandler {
     public TickEventHandlerImpl(ExecutorService executorService,
             Collection<? extends ClockListener> listeners) {
         this.executorService = Objects.requireNonNull(executorService);
-        listenerTasks = listeners.stream().map( cl -> convert(cl)).collect(Collectors.toSet());
+        listenerTasks = listeners.stream().map(this::convert).collect(Collectors.toSet());
     }
 
     /**
-     * Converts a ClockLisener to a Runnable.
+     * Converts a ClockListener to a Runnable.
      *
      * @param cl the clockListener to convert
      * @return the converted Runnable

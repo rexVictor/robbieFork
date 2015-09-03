@@ -22,14 +22,14 @@
 
 package de.leifaktor.robbie.controllers.clock;
 
-//import de.leifaktor.robbie.api.controllers.Clock;
-import de.leifaktor.robbie.api.controllers.ClockListener;
+import de.leifaktor.robbie.api.controllers.clock.ClockListener;
 
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import rex.palace.testes.SequentialExecutorService;
@@ -42,7 +42,7 @@ import java.util.concurrent.TimeoutException;
 
 
 /**
- * Tests the TickEventHandler impementation.
+ * Tests the TickEventHandler implementation.
  */
 public class TickEventHandlerTest {
 
@@ -50,6 +50,32 @@ public class TickEventHandlerTest {
      * The Logger for this test.
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(TickEventHandlerTest.class);
+
+    /**
+     * A SequentialExecutorService, which gets set to a new one
+     * before every test.
+     */
+    private SequentialExecutorService seqExSer;
+
+    /**
+     * The callCounter to use for testing.
+     */
+    private CallCounter callCounter;
+
+    /**
+     * A TickEventHandler only calling callCounter.
+     */
+    private TickEventHandler callCounterHandler;
+
+    /**
+     * A TickEventHandler calling nothing.
+     */
+    private TickEventHandler callNothingHandler;
+
+    /**
+     * A TickEventHandler calling the empty lambda.
+     */
+    private TickEventHandler callEmptyHandler;
 
     /**
      * Simple ClockListener implementation, that counts the calls
@@ -65,7 +91,7 @@ public class TickEventHandlerTest {
         /**
          * Empty constructor.
          */
-        public CallCounter() {
+        CallCounter() {
         }
 
         @Override
@@ -76,46 +102,55 @@ public class TickEventHandlerTest {
     }
 
 
-
     /**
      * Empty Constructor.
      */
     public TickEventHandlerTest() {
     }
 
+    /**
+     * Initializes instance variables.
+     */
+    @BeforeMethod
+    public void initializeInstanceVariables() {
+        seqExSer = new SequentialExecutorService();
+        callCounter = new CallCounter();
+        callNothingHandler = new TickEventHandlerImpl(
+                seqExSer, new HashSet<>());
+        Assert.assertFalse(seqExSer.isShutdown());
+        Set<ClockListener> listeners = new HashSet<>();
+        listeners.add(callCounter);
+        callCounterHandler = new TickEventHandlerImpl(
+                seqExSer, listeners);
+        Assert.assertFalse(seqExSer.isShutdown());
+        Set<ClockListener> emptyLambdaSet = new HashSet<>();
+        emptyLambdaSet.add( () -> { });
+        callEmptyHandler = new TickEventHandlerImpl(
+                seqExSer, emptyLambdaSet);
+        Assert.assertFalse(seqExSer.isShutdown());
+    }
+
+
     @Test(enabled = true)
     public void run_NoExceptions() throws InterruptedException {
-        Set<ClockListener> listeners = new HashSet<>();
-        SequentialExecutorService seqExSer = new SequentialExecutorService();
-        CallCounter callCounter = new CallCounter();
-        listeners.add(callCounter);
-        TickEventHandler tickEventHandler = new TickEventHandlerImpl(
-                seqExSer, listeners);
-
         for (int i = 0; i < 10; i++) {
-            tickEventHandler.run();
+            callCounterHandler.run();
         }
         Assert.assertEquals(callCounter.count, 10);
     }
 
     @Test
     public void run_interrupted_doesNothing() throws InterruptedException {
-        Set<ClockListener> listeners = new HashSet<>();
-        SequentialExecutorService seqExSer = new SequentialExecutorService();
-        CallCounter callCounter = new CallCounter();
-        listeners.add(callCounter);
-        TickEventHandler tickEventHandler = new TickEventHandlerImpl(
-                seqExSer, listeners);
         Thread thread = new Thread() {
 
             @Override
             public void run() {
                 for (int i = 0; i < 5; i++) {
-                    tickEventHandler.run();
+                    callCounterHandler.run();
                 }
                 interrupt();
                 for (int i = 0; i < 5; i++) {
-                    tickEventHandler.run();
+                    callCounterHandler.run();
                 }
             }
 
@@ -128,15 +163,8 @@ public class TickEventHandlerTest {
 
     @Test
     public void shutdown() throws InterruptedException, TimeoutException {
-        SequentialExecutorService seqExSer = new SequentialExecutorService();
-        Set<ClockListener> listeners = new HashSet<>();
-        listeners.add(() -> { });
-        TickEventHandler tickEventHandler = new TickEventHandlerImpl(
-                seqExSer, listeners);
-        Assert.assertFalse(seqExSer.isShutdown());
-
         //Parameters don't matter for this test, since nothing runs parallel
-        boolean correctShutdown = tickEventHandler.shutdown(1L, TimeUnit.MILLISECONDS);
+        boolean correctShutdown = callEmptyHandler.shutdown(1L, TimeUnit.MILLISECONDS);
 
         Assert.assertTrue(correctShutdown);
         Assert.assertTrue(seqExSer.isShutdown());
@@ -144,17 +172,11 @@ public class TickEventHandlerTest {
 
     @Test(expectedExceptions = InterruptedException.class)
     public void shutdown_interrupted() throws TimeoutException, InterruptedException {
-        Set<ClockListener> listeners = new HashSet<>();
-        SequentialExecutorService seqExSer = new SequentialExecutorService();
-        TickEventHandler tickEventHandler = new TickEventHandlerImpl(
-                seqExSer, listeners);
-        Assert.assertFalse(seqExSer.isShutdown());
         seqExSer.submitForTerminationInTime(() -> { throw new InterruptedException(); } );
 
-        boolean correctShutdown = true;
         try {
-            //Paramets don't matter for this test, since nothing runs parallel.
-            correctShutdown = tickEventHandler.shutdown(1L, TimeUnit.MILLISECONDS);
+            //Parameters don't matter for this test, since nothing runs parallel.
+            callNothingHandler.shutdown(1L, TimeUnit.MILLISECONDS);
             Assert.fail("No InterruptedException got thrown.");
         } catch (InterruptedException e ) {
             Assert.assertTrue(seqExSer.isShutdown());
@@ -165,17 +187,11 @@ public class TickEventHandlerTest {
 
     @Test(expectedExceptions = TimeoutException.class)
     public void shutdown_tasksLeft() throws InterruptedException, TimeoutException {
-        Set<ClockListener> listeners = new HashSet<>();
-        SequentialExecutorService seqExSer = new SequentialExecutorService();
-        TickEventHandler tickEventHandler = new TickEventHandlerImpl(
-                seqExSer, listeners);
-        Assert.assertFalse(seqExSer.isShutdown());
         seqExSer.submitForNotFishingOnTermination(() -> null );
 
-        boolean correctShutdown = true;
         try {
-            //Paramets don't matter for this test, since nothing runs parallel.
-            correctShutdown = tickEventHandler.shutdown(1L, TimeUnit.MILLISECONDS);
+            //Parameters don't matter for this test, since nothing runs parallel.
+            callNothingHandler.shutdown(1L, TimeUnit.MILLISECONDS);
             Assert.fail("No TimeoutException got thrown.");
         } catch (TimeoutException e) {
             Assert.assertTrue(seqExSer.isShutdown());
@@ -185,33 +201,18 @@ public class TickEventHandlerTest {
 
     @Test
     public void areDone_false() {
-        Set<ClockListener> listeners = new HashSet<>();
-        listeners.add( () -> { } );
-        SequentialExecutorService seqExSer = new SequentialExecutorService();
         seqExSer.setState(SequentialExecutorService.ExecutorServiceState.NEVER);
-        TickEventHandler tickEventHandler = new TickEventHandlerImpl(
-                seqExSer, listeners);
-        Assert.assertFalse(seqExSer.isShutdown());
 
-        tickEventHandler.run();
+        callEmptyHandler.run();
 
-        Assert.assertFalse(tickEventHandler.areDone());
-
+        Assert.assertFalse(callEmptyHandler.areDone());
     }
 
     @Test
     public void areDone_true() {
-        Set<ClockListener> listeners = new HashSet<>();
-        listeners.add( () -> { } );
-        SequentialExecutorService seqExSer = new SequentialExecutorService();
-        TickEventHandler tickEventHandler = new TickEventHandlerImpl(
-                seqExSer, listeners);
-        Assert.assertFalse(seqExSer.isShutdown());
+        callEmptyHandler.run();
 
-        tickEventHandler.run();
-
-        Assert.assertTrue(tickEventHandler.areDone());
-
+        Assert.assertTrue(callEmptyHandler.areDone());
     }
 
 }

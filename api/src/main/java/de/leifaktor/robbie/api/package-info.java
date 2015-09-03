@@ -23,7 +23,7 @@
 /**
  * Defines the API of Robbie.
  *
- * <p> This package holds all common to clients and servers.
+ * <p>This package holds all common to clients and servers.
  */
 package de.leifaktor.robbie.api;
 
