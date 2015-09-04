@@ -14,6 +14,7 @@ allprojects {
             property "sonar.jdbc.password", "sonarqube"
             property "sonar.jdbc.url","jdbc:postgresql://rexis-server/sonarqube"
             property "sonar.jacoco.reportPath", "$buildDir/jacoco/jacocoTest.exec"
+            //property "sonar.analysis.mode", "incremental"
         }
     }
 }
@@ -64,6 +65,7 @@ task docs(type: Javadoc) {
 project(':model') {
     dependencies {
         compile project(':api')
+        testCompile project(':testhelp')
     }
 }
 
@@ -71,6 +73,7 @@ project(':controllers') {
     dependencies {
         compile project(':api')
         testCompile project(':testes')
+        testCompile project(':testhelp')
     }
 }
 // vim:set shiftwidth=4 softtabstop=4 expandtab:
