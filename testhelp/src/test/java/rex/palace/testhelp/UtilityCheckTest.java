@@ -48,7 +48,7 @@ public class UtilityCheckTest {
     private static class ConstructorThrows {
 
         /**
-         * Creates a new ConstrctorThrows.
+         * Creates a new ConstructorThrows.
          */
         ConstructorThrows() {
             throw new NullPointerException();
@@ -62,7 +62,7 @@ public class UtilityCheckTest {
     }
 
     @Test
-    public void isUtiltyClass_true() {
+    public void isUtilityClass_true() {
         Assert.assertTrue(UtilityCheck.isUtilityClass(UtilityCheck.class));
     }
 

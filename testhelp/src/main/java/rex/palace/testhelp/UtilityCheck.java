@@ -92,7 +92,7 @@ public final class UtilityCheck {
     }
 
     /**
-     * Returns if the constructors of clazz meets the utililty class design.
+     * Returns if the constructors of clazz meets the utility class design.
      *
      * <p>This means clazz may have only one private no argument constructor.
      *

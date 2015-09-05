@@ -103,10 +103,10 @@ public final class ExceptionConstructorTest {
     /**
      * Returns an Exception instance of type clazz.
      *
-     * <p>It is constucted using the Constructor with types and argument values.
+     * <p>It is constructed using the Constructor with types and argument values.
      *
      * @param <V> the type of the exception
-     * @param clazz the class to instanciate
+     * @param clazz the class to instantiate
      * @param types the constructor to use
      * @param values the parameters for construction
      * @return an instance of V constructed using the types constructor
@@ -124,7 +124,7 @@ public final class ExceptionConstructorTest {
      * @param <V> the type of the Exception
      * @param clazz the clazz a Constructor shall be gotten
      * @param paramTypes the parameter types the constructor should have
-     * @return an constuctor of type V wih paramTypes as its arguments or
+     * @return an constructor of type V wih paramTypes as its arguments or
      *         null if such a constructor could not be found
      */
     private static <V extends Exception> Constructor<V> getConstructor(
@@ -167,7 +167,7 @@ public final class ExceptionConstructorTest {
      * @param <V> the type of the exception
      * @param clazz the class to check
      * @return true if and only if clazz has a Throwable constructor, which
-     *         respects the API of Exception(Thowable)
+     *         respects the API of Exception(Throwable)
      */
     public static <V extends Exception> boolean hasThrowableConstructor(Class<V> clazz) {
         Class<?>[] types = new Class<?>[] { Throwable.class };

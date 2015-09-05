@@ -149,7 +149,7 @@ public class ClockExceptionHandlerTest {
     private AtomicBoolean gotCalled;
 
     /**
-     * Helper instance to lock for Multithreading.
+     * Helper instance to lock for multi threading.
      */
     private Lock lock;
 
@@ -170,7 +170,7 @@ public class ClockExceptionHandlerTest {
     }
 
     /**
-     * Initilaizes the instance variables.
+     * Initializes the instance variables.
      */
     @BeforeMethod
     public void initializeInstanceVariables() {
@@ -183,7 +183,7 @@ public class ClockExceptionHandlerTest {
     }
 
     /**
-     * Shutsdown the exectuor service if it is not null.
+     * Shuts down the executor service if it is not null.
      */
     @AfterMethod
     public void tearDownService() {

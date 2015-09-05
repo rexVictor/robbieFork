@@ -71,13 +71,13 @@ public class ClockExceptionHandler implements Runnable {
     private boolean shutdown = false;
 
     /**
-     * Indicates that exceptionOccured has been called,
-     * but the clockrestorer has not yet been called.
+     * Indicates that exceptionOccurred has been called,
+     * but the ClockRestorer has not yet been called.
      *
      * <p>Needed for Race conditions, if exceptionOccurred() is scheduled
-     * before run() can aquire the lock.
+     * before run() can acquire the lock.
      */
-    private boolean exceptionOccured = false;
+    private boolean exceptionOccurred = false;
 
     /**
      * Creates a new ClockExceptionHandler.
@@ -87,7 +87,7 @@ public class ClockExceptionHandler implements Runnable {
      * @param restorer the ClockRestorer to notify
      */
     public ClockExceptionHandler(ExecutorService service, Clock clock, ClockRestorer restorer) {
-        this.service = Objects.requireNonNull(service, "The ExectuorService may not be null.");
+        this.service = Objects.requireNonNull(service, "The ExecutorService may not be null.");
         Objects.requireNonNull(clock, "The Clock may not be null.");
         Objects.requireNonNull(restorer, "The ClockRestorer may not be null.");
         this.clockRestorer = () -> restorer.exceptionHappened(clock) ;
@@ -98,7 +98,7 @@ public class ClockExceptionHandler implements Runnable {
         while (!Thread.currentThread().isInterrupted() && !shutdown) {
             lock.lock();
             try {
-                if (!exceptionOccured) {
+                if (!exceptionOccurred) {
                     condition.await();
                 }
             } catch (InterruptedException e) {
@@ -106,7 +106,7 @@ public class ClockExceptionHandler implements Runnable {
                 Thread.currentThread().interrupt();
             } finally {
                 lock.unlock();
-                exceptionOccured = false;
+                exceptionOccurred = false;
                 submit();
             }
         }
@@ -142,7 +142,7 @@ public class ClockExceptionHandler implements Runnable {
     public void exceptionOccurred() {
         lock.lock();
         try {
-            exceptionOccured = true;
+            exceptionOccurred = true;
             condition.signalAll();
         } finally {
             lock.unlock();
