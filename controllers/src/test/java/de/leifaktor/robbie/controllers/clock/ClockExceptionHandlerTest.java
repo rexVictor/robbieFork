@@ -31,6 +31,7 @@ import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+import rex.palace.testhelp.ThreadTestUtils;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -133,6 +134,7 @@ public class ClockExceptionHandlerTest {
             }
         }
     }
+
     /**
      * The ExecutorService the tests use.
      */
@@ -164,6 +166,31 @@ public class ClockExceptionHandlerTest {
     private MockRestorer mockRestorer;
 
     /**
+     * An empty ClockRestorer.
+     */
+    private final ClockRestorer emptyRestorer = cl -> { };
+
+    /**
+     * A ClockExceptionHandler using the mockRestorer.
+     */
+    private ClockExceptionHandler mockHandler;
+
+    /**
+     * A ClockExceptionHandler using the emptyRestorer.
+     */
+    private ClockExceptionHandler emptyHandler;
+
+    /**
+     * A thread constructed with emptyHandler as Runnable.
+     */
+    private Thread emptyHandlerThread;
+
+    /**
+     * A thread constructed with mockHandler as Runnable.
+     */
+    private Thread mockHandlerThread;
+
+    /**
      * Empty Constructor.
      */
     public ClockExceptionHandlerTest() {
@@ -180,6 +207,10 @@ public class ClockExceptionHandlerTest {
         lock = new ReentrantLock();
         condition = lock.newCondition();
         mockRestorer = new MockRestorer(lock, condition, gotCalled);
+        mockHandler = new ClockExceptionHandler(service, clock, mockRestorer);
+        mockHandlerThread = new Thread(mockHandler);
+        emptyHandler = new ClockExceptionHandler(service, clock, emptyRestorer);
+        emptyHandlerThread = new Thread(emptyHandler);
     }
 
     /**
@@ -192,57 +223,45 @@ public class ClockExceptionHandlerTest {
         }
     }
 
-
     @Test(expectedExceptions = NullPointerException.class)
     public void new_ServiceNull() {
-        service = null;
-        ClockRestorer restorer = cl -> { };
-        ClockExceptionHandler handler = new ClockExceptionHandler(service, clock, restorer);
+        new ClockExceptionHandler(null, clock, emptyRestorer);
     }
 
     @Test(expectedExceptions = NullPointerException.class)
     public void new_ClockNull() {
-        clock = null;
-        ClockRestorer restorer = cl -> { };
-        ClockExceptionHandler handler = new ClockExceptionHandler(service, clock, restorer);
+        new ClockExceptionHandler(service, null, emptyRestorer);
     }
 
     @Test(expectedExceptions = NullPointerException.class)
     public void new_RestorerNull() {
-        ClockRestorer restorer = null;
-        ClockExceptionHandler handler = new ClockExceptionHandler(service, clock, restorer);
+        new ClockExceptionHandler(service, clock, null);
     }
 
     @Test(timeOut = 1000L)
     public void run_stopsOnInterruption() throws InterruptedException {
-        ClockRestorer restorer = cl -> { };
-        ClockExceptionHandler handler = new ClockExceptionHandler(service, clock, restorer);
-        Thread thread = new Thread(handler);
-        thread.start();
-        thread.interrupt();
-        thread.join();
+        emptyHandlerThread.start();
+
+        emptyHandlerThread.interrupt();
+
+        emptyHandlerThread.join();
     }
 
     @Test(timeOut = 1000L)
     public void run_StopsOnSleepingInterruption() throws InterruptedException {
-        ClockRestorer restorer = cl -> { };
-        ClockExceptionHandler handler = new ClockExceptionHandler(service, clock, restorer);
-        Thread thread = new Thread(handler);
-        thread.start();
-        while (thread.getState() != Thread.State.WAITING) {
-            TimeUnit.MILLISECONDS.sleep(1L);
-        }
-        thread.interrupt();
-        thread.join();
+        emptyHandlerThread.start();
+        ThreadTestUtils.waitTillThreadInState(emptyHandlerThread, Thread.State.WAITING);
+
+        emptyHandlerThread.interrupt();
+
+        emptyHandlerThread.join();
     }
 
     @Test(timeOut = 1000L)
     public void run_notifiesRestorer_IfFirstExceptionOccurred() throws InterruptedException {
-        ClockExceptionHandler handler = new ClockExceptionHandler(service, clock, mockRestorer);
-        Thread thread = new Thread(handler);
+        mockHandler.exceptionOccurred();
+        mockHandlerThread.start();
 
-        handler.exceptionOccurred();
-        thread.start();
         lock.lock();
         try {
             condition.await();
@@ -251,19 +270,14 @@ public class ClockExceptionHandlerTest {
         }
 
         Assert.assertTrue(gotCalled.get());
-
     }
 
     @Test(timeOut = 1000L)
     public void run_notifiesRestorer_IfFirstRun() throws InterruptedException {
-        ClockExceptionHandler handler = new ClockExceptionHandler(service, clock, mockRestorer);
-        Thread thread = new Thread(handler);
-        thread.start();
-        while (thread.getState() != Thread.State.WAITING) {
-            TimeUnit.MILLISECONDS.sleep(1L);
-        }
+        mockHandlerThread.start();
+        ThreadTestUtils.waitTillThreadInState(mockHandlerThread, Thread.State.WAITING);
 
-        handler.exceptionOccurred();
+        mockHandler.exceptionOccurred();
         lock.lock();
         try {
             condition.await();
@@ -272,55 +286,39 @@ public class ClockExceptionHandlerTest {
         }
 
         Assert.assertTrue(gotCalled.get());
-
     }
 
     @Test(timeOut = 1000L)
     public void run_notRun_ifShutdown() throws InterruptedException {
-        ClockExceptionHandler handler = new ClockExceptionHandler(service, clock, mockRestorer);
+        mockHandler.shutdown();
+        mockHandlerThread.start();
 
-        handler.shutdown();
-        Thread thread = new Thread(handler);
-        thread.start();
-        thread.join();
-
+        mockHandlerThread.join();
         Assert.assertFalse(gotCalled.get());
-
     }
 
     @Test(timeOut = 1000L)
     public void shutdown() throws InterruptedException {
-        ClockExceptionHandler handler = new ClockExceptionHandler(service, clock, mockRestorer);
-
-        handler.shutdown();
-        Thread thread = new Thread(handler);
-        thread.start();
-        thread.join();
+        mockHandler.shutdown();
+        mockHandlerThread.start();
+        mockHandlerThread.join();
 
         Assert.assertFalse(gotCalled.get());
         Assert.assertTrue(service.isShutdown());
         Assert.assertTrue(service.isTerminated());
-
     }
 
     @Test(timeOut = 1000L)
     public void run_terminatesOnShutdownWithoutCalling() throws InterruptedException {
-        ClockExceptionHandler handler = new ClockExceptionHandler(service, clock, mockRestorer);
+        mockHandlerThread.start();
+        ThreadTestUtils.waitTillThreadInState(mockHandlerThread, Thread.State.WAITING);
 
-        Thread thread = new Thread(handler);
-        thread.start();
-        while (thread.getState() != Thread.State.WAITING) {
-            TimeUnit.MILLISECONDS.sleep(1L);
-        }
+        mockHandler.shutdown();
 
-        handler.shutdown();
-
-        thread.join();
-
+        mockHandlerThread.join();
         Assert.assertFalse(gotCalled.get());
         Assert.assertTrue(service.isShutdown());
         Assert.assertTrue(service.isTerminated());
-
     }
 
 }
