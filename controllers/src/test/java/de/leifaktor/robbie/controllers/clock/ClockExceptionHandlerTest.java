@@ -1,10 +1,32 @@
+/*
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+ *
+ * This file is part of Robbie.
+ *
+ * Robbie is a 2d-adventure game.
+ * Copyright (C) 2015 Matthias Johannes Reimchen
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package de.leifaktor.robbie.controllers.clock;
 
 import de.leifaktor.robbie.api.controllers.clock.Clock;
 import de.leifaktor.robbie.api.controllers.clock.ClockException;
 import de.leifaktor.robbie.api.controllers.clock.ClockListener;
 import de.leifaktor.robbie.api.controllers.clock.ClockRestorer;
-import org.apache.tools.ant.taskdefs.Exec;
+
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -12,7 +34,6 @@ import org.testng.annotations.Test;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Condition;
@@ -24,7 +45,17 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class ClockExceptionHandlerTest {
 
+    /**
+     * A stub implementation of clock.
+     */
     private static class ClockStub implements Clock {
+
+
+        /**
+         * Empty Constructor.
+         */
+        ClockStub() {
+        }
 
         @Override
         public void addClockListener(ClockListener listener) {
@@ -58,6 +89,51 @@ public class ClockExceptionHandlerTest {
     }
 
     /**
+     * A mock implementation of ClockRestorer.
+     *
+     * <p>On call it sets the AtomicBoolean to true and signal the condition.
+     */
+    private static final class MockRestorer implements ClockRestorer {
+
+        /**
+         * The lock providing the condition.
+         */
+        private final Lock lock;
+
+        /**
+         * The Condition to signal on call.
+         */
+        private final Condition condition;
+
+        /**
+         * The AtomicBoolean to set to true.
+         */
+        private final AtomicBoolean atomicBoolean;
+
+        /**
+         * Creates a new MockRestorer.
+         * @param lock the lock providing condition
+         * @param condition the condition to signal
+         * @param atomicBoolean the boolean to update
+         */
+        private MockRestorer(Lock lock, Condition condition, AtomicBoolean atomicBoolean) {
+            this.lock = lock;
+            this.condition = condition;
+            this.atomicBoolean = atomicBoolean;
+        }
+
+        @Override
+        public void exceptionHappened(Clock clock) {
+            lock.lock();
+            try {
+                atomicBoolean.set(true);
+                condition.signalAll();
+            } finally {
+                lock.unlock();
+            }
+        }
+    }
+    /**
      * The ExecutorService the tests use.
      */
     private ExecutorService service;
@@ -83,11 +159,19 @@ public class ClockExceptionHandlerTest {
     private Condition condition;
 
     /**
+     * A mockRestorer.
+     */
+    private MockRestorer mockRestorer;
+
+    /**
      * Empty Constructor.
      */
     public ClockExceptionHandlerTest() {
     }
 
+    /**
+     * Initilaizes the instance variables.
+     */
     @BeforeMethod
     public void initializeInstanceVariables() {
         service = Executors.newCachedThreadPool();
@@ -95,8 +179,12 @@ public class ClockExceptionHandlerTest {
         gotCalled = new AtomicBoolean(false);
         lock = new ReentrantLock();
         condition = lock.newCondition();
+        mockRestorer = new MockRestorer(lock, condition, gotCalled);
     }
 
+    /**
+     * Shutsdown the exectuor service if it is not null.
+     */
     @AfterMethod
     public void tearDownService() {
         if (service != null) {
@@ -114,7 +202,7 @@ public class ClockExceptionHandlerTest {
 
     @Test(expectedExceptions = NullPointerException.class)
     public void new_ClockNull() {
-        Clock clock = null;
+        clock = null;
         ClockRestorer restorer = cl -> { };
         ClockExceptionHandler handler = new ClockExceptionHandler(service, clock, restorer);
     }
@@ -150,16 +238,7 @@ public class ClockExceptionHandlerTest {
 
     @Test(timeOut = 1000L)
     public void run_notifiesRestorer_IfFirstExceptionOccurred() throws InterruptedException {
-        ClockRestorer restorer = cl -> {
-            lock.lock();
-            try {
-                gotCalled.set(true);
-                condition.signalAll();
-            } finally {
-                lock.unlock();
-            }
-        };
-        ClockExceptionHandler handler = new ClockExceptionHandler(service, clock, restorer);
+        ClockExceptionHandler handler = new ClockExceptionHandler(service, clock, mockRestorer);
         Thread thread = new Thread(handler);
 
         handler.exceptionOccurred();
@@ -177,16 +256,7 @@ public class ClockExceptionHandlerTest {
 
     @Test(timeOut = 1000L)
     public void run_notifiesRestorer_IfFirstRun() throws InterruptedException {
-        ClockRestorer restorer = cl -> {
-            lock.lock();
-            try {
-                gotCalled.set(true);
-                condition.signalAll();
-            } finally {
-                lock.unlock();
-            }
-        };
-        ClockExceptionHandler handler = new ClockExceptionHandler(service, clock, restorer);
+        ClockExceptionHandler handler = new ClockExceptionHandler(service, clock, mockRestorer);
         Thread thread = new Thread(handler);
         thread.start();
         while (thread.getState() != Thread.State.WAITING) {
@@ -207,8 +277,7 @@ public class ClockExceptionHandlerTest {
 
     @Test(timeOut = 1000L)
     public void run_notRun_ifShutdown() throws InterruptedException {
-        ClockRestorer restorer = cl -> { gotCalled.set(true); };
-        ClockExceptionHandler handler = new ClockExceptionHandler(service, clock, restorer);
+        ClockExceptionHandler handler = new ClockExceptionHandler(service, clock, mockRestorer);
 
         handler.shutdown();
         Thread thread = new Thread(handler);
@@ -221,8 +290,7 @@ public class ClockExceptionHandlerTest {
 
     @Test(timeOut = 1000L)
     public void shutdown() throws InterruptedException {
-        ClockRestorer restorer = cl -> { gotCalled.set(true); };
-        ClockExceptionHandler handler = new ClockExceptionHandler(service, clock, restorer);
+        ClockExceptionHandler handler = new ClockExceptionHandler(service, clock, mockRestorer);
 
         handler.shutdown();
         Thread thread = new Thread(handler);
@@ -237,8 +305,7 @@ public class ClockExceptionHandlerTest {
 
     @Test(timeOut = 1000L)
     public void run_terminatesOnShutdownWithoutCalling() throws InterruptedException {
-        ClockRestorer restorer = cl -> { gotCalled.set(true); };
-        ClockExceptionHandler handler = new ClockExceptionHandler(service, clock, restorer);
+        ClockExceptionHandler handler = new ClockExceptionHandler(service, clock, mockRestorer);
 
         Thread thread = new Thread(handler);
         thread.start();

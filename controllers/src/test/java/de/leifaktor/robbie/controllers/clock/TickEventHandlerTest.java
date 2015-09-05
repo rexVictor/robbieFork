@@ -173,7 +173,6 @@ public class TickEventHandlerTest {
     @Test(expectedExceptions = InterruptedException.class)
     public void shutdown_interrupted() throws TimeoutException, InterruptedException {
         seqExSer.submitForTerminationInTime(() -> { throw new InterruptedException(); } );
-
         try {
             //Parameters don't matter for this test, since nothing runs parallel.
             callNothingHandler.shutdown(1L, TimeUnit.MILLISECONDS);
