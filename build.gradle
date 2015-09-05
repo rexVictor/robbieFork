@@ -62,6 +62,12 @@ task docs(type: Javadoc) {
         project.sourceSets.main.compileClasspath})
 }
 
+project(':api') {
+    dependencies {
+        testCompile project(':testhelp')
+    }
+}
+
 project(':model') {
     dependencies {
         compile project(':api')

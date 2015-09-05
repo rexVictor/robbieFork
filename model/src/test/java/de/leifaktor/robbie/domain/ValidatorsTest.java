@@ -24,6 +24,7 @@ package de.leifaktor.robbie.domain;
 
 import org.testng.Assert;
 import org.testng.annotations.Test;
+import rex.palace.testhelp.UtilityCheck;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -90,7 +91,7 @@ public class ValidatorsTest {
 
     @Test
     public void testValidatorsIsUtilityClass() throws Exception {
-        TestHelper.assertUtilityClassWellDefined(Validators.class);
+        UtilityCheck.isUtilityClass(Validators.class);
     }
 
 

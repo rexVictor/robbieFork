@@ -19,6 +19,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package rex.palace.testhelp;
 
 import java.lang.reflect.Constructor;
@@ -27,7 +28,7 @@ import java.lang.reflect.InvocationTargetException;
 /**
  * Tests if a given class is an Exception and provides the same Constructors as Exception.
  */
-public class ExceptionConstructorTest {
+public final class ExceptionConstructorTest {
 
     /**
      * Empty Private Constructor since this is a Utility class.
@@ -49,6 +50,7 @@ public class ExceptionConstructorTest {
      * Returns if clazz has an empty constructor and on invoking cause and message
      * are null.
      *
+     * @param <V> the type of the exception
      * @param clazz the class to check
      * @return if clazz has an empty constructor which sets message and cause to null
      */
@@ -65,6 +67,7 @@ public class ExceptionConstructorTest {
      * Returns if clazz has a String constructor and on invoking cause is null and message
      * is set properly.
      *
+     * @param <V> the type of the exception
      * @param clazz the class to check
      * @return if clazz has an empty constructor which sets message properly and cause to null
      */
@@ -82,6 +85,7 @@ public class ExceptionConstructorTest {
      * Returns if clazz has a String, Throwable constructor and on invoking message
      * and case are set properly.
      *
+     * @param <V> the type of the exception
      * @param clazz the class to check
      * @return if clazz has a String, Throwable constructor which sets properly.
      */
@@ -96,13 +100,35 @@ public class ExceptionConstructorTest {
         return correctData(exception, testString,testCause);
     }
 
-    private static <V extends Exception> V getException(Class<V> clazz, Class<?>[] types, Object... values) {
+    /**
+     * Returns an Exception instance of type clazz.
+     *
+     * <p>It is constucted using the Constructor with types and argument values.
+     *
+     * @param <V> the type of the exception
+     * @param clazz the class to instanciate
+     * @param types the constructor to use
+     * @param values the parameters for construction
+     * @return an instance of V constructed using the types constructor
+     *         and values as its parameters or null if it could not be done
+     */
+    private static <V extends Exception> V getException(
+            Class<V> clazz, Class<?>[] types, Object... values) {
         Constructor<V> constructor = getConstructor(clazz, types);
         return construct(constructor, values);
     }
 
+    /**
+     * Returns a Constructor of V with paramTypes as its parameter types.
+     *
+     * @param <V> the type of the Exception
+     * @param clazz the clazz a Constructor shall be gotten
+     * @param paramTypes the parameter types the constructor should have
+     * @return an constuctor of type V wih paramTypes as its arguments or
+     *         null if such a constructor could not be found
+     */
     private static <V extends Exception> Constructor<V> getConstructor(
-            Class<V> clazz, Class<?>... paramTypes){
+            Class<V> clazz, Class<?>... paramTypes) {
         try {
             return clazz.getDeclaredConstructor(paramTypes);
         } catch (NoSuchMethodException e) {
@@ -111,6 +137,16 @@ public class ExceptionConstructorTest {
         }
     }
 
+    /**
+     * Constructs an Exception using constructor and args.
+     *
+     * @param constructor the constructor to use for construction
+     * @param args the arguments for constructor
+     * @param <V> the type of the Exception
+     * @return an instance of v constructed using constructor with args
+     *         or null if constructor is null or if the instance could
+     *         not be created
+     */
     private static <V extends Exception> V construct(Constructor<V> constructor,
                                        Object... args) {
         if (constructor == null) {
@@ -126,9 +162,12 @@ public class ExceptionConstructorTest {
 
     /**
      * Returns if clazz has a Throwable constructor and on invoking message is
-     * set to null and cause properly
-     * @param clazz
-     * @return
+     * set to cause.toString() and cause properly.
+     *
+     * @param <V> the type of the exception
+     * @param clazz the class to check
+     * @return true if and only if clazz has a Throwable constructor, which
+     *         respects the API of Exception(Thowable)
      */
     public static <V extends Exception> boolean hasThrowableConstructor(Class<V> clazz) {
         Class<?>[] types = new Class<?>[] { Throwable.class };
@@ -162,6 +201,7 @@ public class ExceptionConstructorTest {
      * Returns if clazz has all Exception constructors and each sets message and cause
      * properly.
      *
+     * @param <V> the type of the exception
      * @param clazz the class to check
      * @return if clazz describes a proper exception
      */
