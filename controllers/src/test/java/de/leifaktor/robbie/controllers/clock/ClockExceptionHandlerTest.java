@@ -84,7 +84,7 @@ public class ClockExceptionHandlerTest {
         }
 
         @Override
-        public long getTickDurationInMillis() {
+        public long getTickDuration(TimeUnit unit) {
             return 0;
         }
     }

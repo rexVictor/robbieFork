@@ -28,13 +28,25 @@ import de.leifaktor.robbie.api.controllers.clock.TicksTooFastException;
 
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import rex.palace.testes.SequentialScheduledExecutorService;
+import rex.palace.testhelp.ArgumentConverter;
+import rex.palace.testhelp.TestThread;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.sql.SQLException;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.Random;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.stream.LongStream;
 
 
 /**
@@ -43,44 +55,16 @@ import java.util.concurrent.TimeoutException;
 public class ClockTest {
 
     /**
-     * A Thread helping testing.
+     * The TimeUnits used for testing.
      */
-    private abstract static class TestThread extends Thread {
+    private static final Object[] VALID_TIME_UNITS =
+            { TimeUnit.MICROSECONDS, TimeUnit.MILLISECONDS };
 
-        /**
-         * The exception thrown by run.
-         */
-        public Throwable exception;
+    /**
+     * The limit of stream elements for testing.
+     */
+    private static final int MAX_RUNS = 5;
 
-        /**
-         * A failMessage used for assertFail.
-         */
-        public String failMessage;
-
-        /**
-         * Creates a new TestThread.
-         */
-        TestThread() {
-        }
-
-        @Override
-        public abstract void run();
-
-        /**
-         * Execute in current Thread.
-         *
-         * @throws Throwable if it occurred in run
-         */
-        public void finish() throws Throwable {
-            if (failMessage != null) {
-                Assert.fail(failMessage);
-            }
-            if (exception != null) {
-                throw exception;
-            }
-        }
-
-    }
 
     /**
      * A mock class for TickEventHandler.
@@ -164,15 +148,15 @@ public class ClockTest {
         /**
          * The Exception to throw.
          */
-        private final Throwable throwable;
+        private final Exception exception;
 
         /**
          * Creates a new TickEventHandlerMock.
          *
-         * @param throwable the exception to throw in run
+         * @param exception the exception to throw in run
          */
-        ShutDownThrowHandler(Throwable throwable) {
-            this.throwable = throwable;
+        ShutDownThrowHandler(Exception exception) {
+            this.exception = exception;
         }
 
         @Override
@@ -183,7 +167,7 @@ public class ClockTest {
         public boolean shutdown(long timeOutDuration, TimeUnit timeOutUnit)
                     throws TimeoutException, InterruptedException {
             try {
-                throw throwable;
+                throw exception;
             } catch (TimeoutException | InterruptedException e) {
                 throw e;
             } catch (Throwable e) {
@@ -240,50 +224,150 @@ public class ClockTest {
     }
 
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
-    public void new_NegativeTickDuration() {
-        new ClockImpl(nullFactory, sses, -1L, TimeUnit.MILLISECONDS);
+    @Test(expectedExceptions = IllegalArgumentException.class,
+            dataProvider = "negativeLongsCrossTimeUnits")
+    public void new_NegativeTickDuration(long negativeLong, TimeUnit unit) {
+        new ClockImpl(nullFactory, sses, negativeLong, unit);
     }
 
-    @Test(expectedExceptions = NullPointerException.class)
-    public void new_nullExecutorService() {
-        new ClockImpl(nullFactory, null, 1L, TimeUnit.MILLISECONDS);
+    @Test(expectedExceptions = IllegalArgumentException.class,
+            dataProvider = "randomNegativeLongsCrossTimeUnits")
+    public void new_NegativeTickDuration_random(long negativeLong, TimeUnit unit) {
+        new_NegativeTickDuration(negativeLong, unit);
     }
 
-    @Test(expectedExceptions = NullPointerException.class)
-    public void new_nullTickEventHandlerFactory() {
-        new ClockImpl(null, sses, 1L, TimeUnit.MILLISECONDS);
+    @DataProvider(name = "negativeLongsCrossTimeUnits")
+    public Iterator<Object[]> getNegativeLongsCrossTimeUnits() {
+        return ArgumentConverter.cross(
+                LongStream.rangeClosed(1, MAX_RUNS).mapToObj(lg -> -lg).toArray(),
+                VALID_TIME_UNITS);
     }
 
-    @Test(expectedExceptions = NullPointerException.class)
-    public void new_nullTimeUnit() {
-        new ClockImpl(nullFactory, sses, 1L, null);
+    @DataProvider(name = "positiveLongsCrossTimeUnits")
+    public Iterator<Object[]> getPositiveLongsCrossTimeUnits() {
+        return ArgumentConverter.cross(
+                LongStream.rangeClosed(1, MAX_RUNS).mapToObj(Long::valueOf).toArray(),
+                VALID_TIME_UNITS);
     }
 
-    @Test
-    public void getTickDurationInMillis() {
+    @DataProvider(name = "randomNegativeLongsCrossTimeUnits")
+    public Iterator<Object[]> getRandomNegativeLongs() {
+        Random random = new Random();
+        LongStream stream = random.longs(MAX_RUNS, Long.MIN_VALUE, 0L);
+        return ArgumentConverter.cross(stream.mapToObj(Long::valueOf).toArray(),
+                VALID_TIME_UNITS);
+    }
+
+    @DataProvider(name = "randomPositiveLongsCrossTimeUnits")
+    public Iterator<Object[]> getRandomPositiveLongsCrossTimeUnits() {
+        Random random = new Random();
+        LongStream stream = random.longs(MAX_RUNS, 1L, Long.MAX_VALUE / 10000);
+        return ArgumentConverter.cross(stream.mapToObj(lg -> lg).toArray(),
+                VALID_TIME_UNITS);
+    }
+
+    @DataProvider(name = "positiveLongs")
+    public Iterator<Object[]> getPositiveLongs() {
+        return ArgumentConverter.cross(
+                LongStream.rangeClosed(1, MAX_RUNS).mapToObj(Long::valueOf).toArray());
+    }
+
+    @DataProvider(name = "randomPositiveLongs")
+    public Iterator<Object[]> getRandomPositiveLongs() {
+        Random random = new Random();
+        return ArgumentConverter.cross(random.longs(
+                MAX_RUNS, 1, Long.MAX_VALUE).mapToObj(Long::valueOf).toArray());
+    }
+
+
+    @Test(expectedExceptions = NullPointerException.class,
+            dataProvider = "positiveLongsCrossTimeUnits")
+    public void new_nullExecutorService(long duration, TimeUnit unit) {
+        new ClockImpl(nullFactory, null, duration, unit);
+    }
+
+    @Test(expectedExceptions = NullPointerException.class,
+            dataProvider = "randomPositiveLongsCrossTimeUnits")
+    public void new_nullExecutorServiceRandom(long duration, TimeUnit unit) {
+        new_nullExecutorService(duration, unit);
+    }
+
+    @Test(expectedExceptions = NullPointerException.class,
+            dataProvider = "positiveLongsCrossTimeUnits")
+    public void new_nullTickEventHandlerFactory(long duration, TimeUnit unit) {
+        new ClockImpl(null, sses, duration, unit);
+    }
+
+    @Test(expectedExceptions = NullPointerException.class,
+            dataProvider = "randomPositiveLongsCrossTimeUnits")
+    public void new_nullTickEventHandlerFactoryRandom(long duration, TimeUnit unit) {
+        new_nullTickEventHandlerFactory(duration, unit);
+    }
+
+    @Test(expectedExceptions = NullPointerException.class,
+            dataProvider = "positiveLongs")
+    public void new_nullTimeUnit(long duration) {
+        new ClockImpl(nullFactory, sses, duration, null);
+    }
+
+    @Test(expectedExceptions = NullPointerException.class,
+            dataProvider = "randomPositiveLongs")
+    public void new_nullTimeUnit_random(long duration) {
+        new_nullTimeUnit(duration);
+    }
+
+    @Test(dataProvider = "positiveLongsCrossTimeUnits")
+    public void getTickDuration(long duration, TimeUnit unit) {
+        Clock clock = new ClockImpl(nullFactory,
+                sses, duration, unit);
+
+        Assert.assertEquals(clock.getTickDuration(unit), duration);
+    }
+
+    @Test(dataProvider = "randomPositiveLongsCrossTimeUnits")
+    public void getTickDuration_random(long duration, TimeUnit unit) {
+        getTickDuration(duration, unit);
+    }
+
+    @Test(dataProvider = "positiveLongsCrossTimeUnits")
+    public void setTickDuration_StoppedClock(long duration, TimeUnit unit) {
         Clock clock = new ClockImpl(nullFactory,
                 sses, 10L, TimeUnit.MILLISECONDS);
 
-        Assert.assertEquals(clock.getTickDurationInMillis(), 10L);
+        clock.setTickDuration(duration, unit);
+
+        Assert.assertEquals(clock.getTickDuration(unit), duration);
     }
 
-    @Test
-    public void setTickDuration_StoppedClock() {
-        Clock clock = new ClockImpl(nullFactory,
-                sses, 10L, TimeUnit.MILLISECONDS);
-
-        clock.setTickDuration(5L, TimeUnit.SECONDS);
-
-        Assert.assertEquals(clock.getTickDurationInMillis(), 5000L);
+    @Test(dataProvider = "randomPositiveLongsCrossTimeUnits")
+    public void setTickDuration_StoppedClock_random(long duration, TimeUnit unit) {
+        setTickDuration_StoppedClock(duration, unit);
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
-    public void setTickDuration_NegativeDuration_StoppedClock() {
+    @Test(expectedExceptions = IllegalArgumentException.class,
+            dataProvider = "positiveLongsCrossTimeUnitsCrossCrossNegativeLongsCrossUnit")
+    public void setTickDuration_NegativeDuration_StoppedClock(
+            long initialDuration, TimeUnit initialUnit, long negativeLong, TimeUnit unit) {
         Clock clock = new ClockImpl(nopFactory,
                 sses, 10L, TimeUnit.MILLISECONDS);
 
-        clock.setTickDuration(-1L, TimeUnit.MILLISECONDS);
+        clock.setTickDuration(negativeLong, unit);
+    }
+
+    @DataProvider(name = "positiveLongsCrossTimeUnitsCrossCrossNegativeLongsCrossUnit")
+    public Iterator<Object[]> positiveLongs_TimeUnits_NegativeLongs_TimeUnits() {
+        Object[] positives = LongStream.range(1L, MAX_RUNS).mapToObj(Long::valueOf).toArray();
+        Object[] negatives = Arrays.stream(positives).map(lg -> - (long) lg).toArray();
+        return ArgumentConverter.cross(positives, VALID_TIME_UNITS, negatives, VALID_TIME_UNITS);
+
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class,
+            dataProvider = "positiveLongsCrossTimeUnitsCrossCrossNegativeLongsCrossUnit")
+    public void setTickDuration_RandomNegativeDuration_StoppedClock(
+            long initialDuration, TimeUnit initialUnit, long negativeLong, TimeUnit unit) {
+        setTickDuration_NegativeDuration_StoppedClock(
+                initialDuration, initialUnit, negativeLong, unit);
     }
 
     @Test(expectedExceptions = NullPointerException.class)
@@ -338,19 +422,17 @@ public class ClockTest {
         clock.startClock();
         clock.stopClock();
 
-        TestThread thread = new TestThread() {
+        TestThread thread = new TestThread(new Callable<Void>() {
 
             @Override
-            public void run() {
-                interrupt();
-                try {
-                    clock.state();
-                    failMessage = "IllegalStateException not thrown.";
-                } catch (Throwable e) {
-                    exception = e;
-                }
+            public Void call() throws Exception {
+                Thread.currentThread().interrupt();
+                clock.state();
+                return null;
             }
-        };
+
+        });
+
         thread.start();
         thread.join();
         thread.finish();
@@ -463,9 +545,8 @@ public class ClockTest {
         Assert.assertSame(wrapped, clockExcep);
     }
 
-    @Test
-    public void wrapToClockException_RuntimeException() {
-        RuntimeException runExcep = new NullPointerException();
+    @Test(dataProvider = "runtimeExceptions")
+    public void wrapToClockException_RuntimeException(RuntimeException runExcep) {
         ExecutionException execExcep = new ExecutionException(runExcep);
 
         ClockException wrapped = ClockImpl.wrapToClockException(execExcep);
@@ -474,15 +555,33 @@ public class ClockTest {
         Assert.assertSame(cause, runExcep);
     }
 
-    @Test
-    public void wrapToClockException_CheckedException() {
-        Exception checkedExcep = new CloneNotSupportedException();
+    @DataProvider(name = "runtimeExceptions")
+    public Object[][] getRuntimeExceptions() {
+        return new Object[][]{
+                { new NullPointerException() }, { new IllegalArgumentException() },
+                { new ArrayIndexOutOfBoundsException() }, { new RuntimeException() },
+                { new NumberFormatException() }, { new ClassCastException() }
+        };
+    }
+
+    @Test(dataProvider = "checkedExceptions")
+    public void wrapToClockException_CheckedException(Exception checkedExcep) {
         ExecutionException execExcep = new ExecutionException(checkedExcep);
 
         ClockException wrapped = ClockImpl.wrapToClockException(execExcep);
         Throwable cause = wrapped.getCause();
 
         Assert.assertSame(cause, checkedExcep);
+    }
+
+    @DataProvider(name = "checkedExceptions")
+    public Object[][] getCheckedExceptions() {
+        return new Object[][] {
+                { new CloneNotSupportedException() }, { new FileNotFoundException() },
+                { new Exception() }, { new IOException() }, { new MalformedURLException() },
+                { new SQLException() }, {new InterruptedException() },
+                { new NoSuchMethodException() }, { new ClassNotFoundException() }
+        };
     }
 
 }

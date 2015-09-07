@@ -179,8 +179,8 @@ public class ClockImpl implements Clock {
     }
 
     @Override
-    public long getTickDurationInMillis() {
-        return tickDurationUnit.toMillis(tickDuration);
+    public long getTickDuration(TimeUnit unit) {
+        return unit.convert(tickDuration, tickDurationUnit);
     }
 
     /**

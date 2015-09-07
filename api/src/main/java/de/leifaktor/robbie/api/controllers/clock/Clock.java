@@ -83,11 +83,12 @@ public interface Clock {
     boolean state() throws ClockException;
 
     /**
-     * Returns the current tick duration in milliseconds.
+     * Returns the current tick duration in unit.
      *
-     * @return the current tick duration in milliseconds.
+     * @param unit the unit in which to return the duration
+     * @return the current tick duration in unit
      */
-    long getTickDurationInMillis();
+    long getTickDuration(TimeUnit unit);
 
 }
 
