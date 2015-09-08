@@ -35,15 +35,10 @@ import rex.palace.testes.SequentialScheduledExecutorService;
 import rex.palace.testhelp.ArgumentConverter;
 import rex.palace.testhelp.TestThread;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Random;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.LongStream;
@@ -67,43 +62,9 @@ public class ClockTest {
 
 
     /**
-     * A mock class for TickEventHandler.
+     * A Mock implementation of TickEventHandler.
      */
-    private static class CallCounter implements TickEventHandler {
-
-        /**
-         * The number of times run() got called.
-         */
-        public int count = 0;
-
-        /**
-         * Creates a new TickEventHandlerMock.
-         */
-        CallCounter() {
-        }
-
-        @Override
-        public void run() {
-            count++;
-        }
-
-        @Override
-        public boolean shutdown(long timeOutDuration, TimeUnit timeOutUnit)
-                    throws TimeoutException, InterruptedException {
-            return true;
-        }
-
-        @Override
-        public boolean areDone() {
-            return true;
-        }
-
-    }
-
-    /**
-     * A NOP implementation of TickEventHandler.
-     */
-    private static class NopTickEventHandler implements TickEventHandler {
+    private static class TickEventHandlerMock implements TickEventHandler {
 
         /**
          * The return vale of shutdown.
@@ -115,69 +76,47 @@ public class ClockTest {
          */
         public boolean areDone = true;
 
+        /**
+         * The exception shutdown throws.
+         */
+        public Exception exception = null;
+
+        /**
+         * The number of times run() got called.
+         */
+        public int count = 0;
+
 
         /**
          * Creates a new TickEventHandlerMock.
          *
          */
-        NopTickEventHandler() {
+        TickEventHandlerMock() {
         }
 
         @Override
         public void run() {
+            count++;
         }
 
         @Override
         public boolean shutdown(long timeOutDuration, TimeUnit timeOutUnit)
                     throws TimeoutException, InterruptedException {
-            return shutdown;
-        }
-
-        @Override
-        public boolean areDone() {
-            return areDone;
-        }
-
-    }
-
-    /**
-     * An Exception throwing implementation of TickEventHandler.
-     */
-    private static class ShutDownThrowHandler implements TickEventHandler {
-
-        /**
-         * The Exception to throw.
-         */
-        private final Exception exception;
-
-        /**
-         * Creates a new TickEventHandlerMock.
-         *
-         * @param exception the exception to throw in run
-         */
-        ShutDownThrowHandler(Exception exception) {
-            this.exception = exception;
-        }
-
-        @Override
-        public void run() {
-        }
-
-        @Override
-        public boolean shutdown(long timeOutDuration, TimeUnit timeOutUnit)
-                    throws TimeoutException, InterruptedException {
+            if (exception == null) {
+                return shutdown;
+            }
             try {
                 throw exception;
-            } catch (TimeoutException | InterruptedException e) {
+            } catch (TimeoutException | InterruptedException | RuntimeException e) {
                 throw e;
-            } catch (Throwable e) {
+            } catch (Exception e) {
                 throw new RuntimeException(e);
             }
         }
 
         @Override
         public boolean areDone() {
-            return true;
+            return areDone;
         }
 
     }
@@ -193,19 +132,14 @@ public class ClockTest {
     private final TickEventHandlerFactory nullFactory = set -> null;
 
     /**
-     * The nop TickEventHandler.
+     * The TickEventHandlerMock tests can use.
      */
-    private NopTickEventHandler nopHandler;
+    private TickEventHandlerMock tickEventHandlerMock;
 
     /**
      * A Nop factory.
      */
-    private final TickEventHandlerFactory nopFactory = set -> nopHandler;
-
-    /**
-     * The CallCounter tests can use.
-     */
-    private CallCounter callCounter;
+    private final TickEventHandlerFactory mockFactory = set -> tickEventHandlerMock;
 
     /**
      * Default Constructor.
@@ -219,21 +153,7 @@ public class ClockTest {
     @BeforeMethod
     public void initializeInstanceVariables() {
         sses = new SequentialScheduledExecutorService();
-        callCounter = new CallCounter();
-        nopHandler = new NopTickEventHandler();
-    }
-
-
-    @Test(expectedExceptions = IllegalArgumentException.class,
-            dataProvider = "negativeLongsCrossTimeUnits")
-    public void new_NegativeTickDuration(long negativeLong, TimeUnit unit) {
-        new ClockImpl(nullFactory, sses, negativeLong, unit);
-    }
-
-    @Test(expectedExceptions = IllegalArgumentException.class,
-            dataProvider = "randomNegativeLongsCrossTimeUnits")
-    public void new_NegativeTickDuration_random(long negativeLong, TimeUnit unit) {
-        new_NegativeTickDuration(negativeLong, unit);
+        tickEventHandlerMock = new TickEventHandlerMock();
     }
 
     @DataProvider(name = "negativeLongsCrossTimeUnits")
@@ -278,6 +198,27 @@ public class ClockTest {
         return ArgumentConverter.cross(random.longs(
                 MAX_RUNS, 1, Long.MAX_VALUE).mapToObj(Long::valueOf).toArray());
     }
+
+    @DataProvider(name = "positiveLongsCrossTimeUnitsCrossCrossNegativeLongsCrossUnit")
+    public Iterator<Object[]> positiveLongs_TimeUnits_NegativeLongs_TimeUnits() {
+        Object[] positives = LongStream.range(1L, MAX_RUNS).mapToObj(Long::valueOf).toArray();
+        Object[] negatives = Arrays.stream(positives).map(lg -> - (long) lg).toArray();
+        return ArgumentConverter.cross(positives, VALID_TIME_UNITS, negatives, VALID_TIME_UNITS);
+    }
+
+
+    @Test(expectedExceptions = IllegalArgumentException.class,
+            dataProvider = "negativeLongsCrossTimeUnits")
+    public void new_NegativeTickDuration(long negativeLong, TimeUnit unit) {
+        new ClockImpl(nullFactory, sses, negativeLong, unit);
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class,
+            dataProvider = "randomNegativeLongsCrossTimeUnits")
+    public void new_NegativeTickDuration_random(long negativeLong, TimeUnit unit) {
+        new_NegativeTickDuration(negativeLong, unit);
+    }
+
 
 
     @Test(expectedExceptions = NullPointerException.class,
@@ -348,19 +289,12 @@ public class ClockTest {
             dataProvider = "positiveLongsCrossTimeUnitsCrossCrossNegativeLongsCrossUnit")
     public void setTickDuration_NegativeDuration_StoppedClock(
             long initialDuration, TimeUnit initialUnit, long negativeLong, TimeUnit unit) {
-        Clock clock = new ClockImpl(nopFactory,
+        Clock clock = new ClockImpl(mockFactory,
                 sses, 10L, TimeUnit.MILLISECONDS);
 
         clock.setTickDuration(negativeLong, unit);
     }
 
-    @DataProvider(name = "positiveLongsCrossTimeUnitsCrossCrossNegativeLongsCrossUnit")
-    public Iterator<Object[]> positiveLongs_TimeUnits_NegativeLongs_TimeUnits() {
-        Object[] positives = LongStream.range(1L, MAX_RUNS).mapToObj(Long::valueOf).toArray();
-        Object[] negatives = Arrays.stream(positives).map(lg -> - (long) lg).toArray();
-        return ArgumentConverter.cross(positives, VALID_TIME_UNITS, negatives, VALID_TIME_UNITS);
-
-    }
 
     @Test(expectedExceptions = IllegalArgumentException.class,
             dataProvider = "positiveLongsCrossTimeUnitsCrossCrossNegativeLongsCrossUnit")
@@ -372,7 +306,7 @@ public class ClockTest {
 
     @Test(expectedExceptions = NullPointerException.class)
     public void setTickDuration_NullUnit_StoppedClock() {
-        Clock clock = new ClockImpl(nopFactory,
+        Clock clock = new ClockImpl(mockFactory,
                 sses, 10L, TimeUnit.MILLISECONDS);
 
         clock.setTickDuration(1L, null);
@@ -380,7 +314,7 @@ public class ClockTest {
 
     @Test(expectedExceptions = ClockAlreadyStartedException.class)
     public void setTickDuration_StartedClock() {
-        Clock clock = new ClockImpl(nopFactory,
+        Clock clock = new ClockImpl(mockFactory,
                 sses, 10L, TimeUnit.MILLISECONDS);
 
         clock.startClock();
@@ -391,22 +325,22 @@ public class ClockTest {
     @Test
     public void startClock_noExceptions() throws ClockException {
         sses.setCallCount(10);
-        callCounter = new CallCounter();
-        TickEventHandlerFactory factory = set -> callCounter;
+        tickEventHandlerMock = new TickEventHandlerMock();
+        TickEventHandlerFactory factory = set -> tickEventHandlerMock;
         Clock clock = new ClockImpl(factory,
                 sses, 10L, TimeUnit.MILLISECONDS);
 
         clock.startClock();
 
-        Assert.assertEquals(callCounter.count, 10);
+        Assert.assertEquals(tickEventHandlerMock.count, 10);
         Assert.assertTrue(clock.state());
     }
 
     @Test(expectedExceptions = TicksTooFastException.class)
     public void startClock_NotAllDone() throws ClockException {
         sses.setCallCount(1);
-        nopHandler.areDone = false;
-        Clock clock = new ClockImpl(nopFactory, sses,
+        tickEventHandlerMock.areDone = false;
+        Clock clock = new ClockImpl(mockFactory, sses,
                 7L, TimeUnit.NANOSECONDS);
 
         clock.startClock();
@@ -416,7 +350,7 @@ public class ClockTest {
     @Test(expectedExceptions = IllegalStateException.class)
     public void state_interrupted() throws Throwable {
         sses.setCallCount(1);
-        Clock clock = new ClockImpl(nopFactory, sses,
+        Clock clock = new ClockImpl(mockFactory, sses,
                 7L, TimeUnit.NANOSECONDS);
 
         clock.startClock();
@@ -441,7 +375,7 @@ public class ClockTest {
     @Test(expectedExceptions = ClockAlreadyStoppedException.class)
     public void stopClock_neverStarted() throws ClockException {
         sses.setCallCount(10);
-        Clock clock = new ClockImpl(nopFactory,
+        Clock clock = new ClockImpl(mockFactory,
                 sses, 10L, TimeUnit.MILLISECONDS);
 
         clock.stopClock();
@@ -450,7 +384,7 @@ public class ClockTest {
     @Test
     public void stopClock_regular() throws ClockException {
         sses.setCallCount(1);
-        Clock clock = new ClockImpl(nopFactory,
+        Clock clock = new ClockImpl(mockFactory,
                 sses, 10L, TimeUnit.MILLISECONDS);
 
         clock.startClock();
@@ -462,9 +396,8 @@ public class ClockTest {
     @Test(expectedExceptions = TicksTooFastException.class)
     public void testStopClock_Timeout() throws ClockException {
         sses.setCallCount(1);
-        Clock clock = new ClockImpl(
-                set -> new ShutDownThrowHandler(new TimeoutException()),
-                sses, 10L, TimeUnit.MILLISECONDS);
+        tickEventHandlerMock.exception = new TimeoutException();
+        Clock clock = new ClockImpl(mockFactory, sses, 10L, TimeUnit.MILLISECONDS);
 
         clock.startClock();
 
@@ -479,9 +412,8 @@ public class ClockTest {
     @Test
     public void testStopClock_Interrupted() throws ClockException {
         sses.setCallCount(1);
-        Clock clock = new ClockImpl(
-                set -> new ShutDownThrowHandler(new InterruptedException()),
-                sses, 10L, TimeUnit.MILLISECONDS);
+        tickEventHandlerMock.exception = new InterruptedException();
+        Clock clock = new ClockImpl(mockFactory, sses, 10L, TimeUnit.MILLISECONDS);
 
         clock.startClock();
         clock.stopClock();
@@ -491,7 +423,7 @@ public class ClockTest {
 
     @Test(expectedExceptions = ClockAlreadyStartedException.class)
     public void startClock_startTwice() {
-        Clock clock = new ClockImpl(nopFactory,
+        Clock clock = new ClockImpl(mockFactory,
                 sses, 10L, TimeUnit.MILLISECONDS);
 
         clock.startClock();
@@ -500,7 +432,7 @@ public class ClockTest {
 
     @Test(expectedExceptions = NullPointerException.class)
     public void addClockListenerCL_stoppedClockNull() {
-        Clock clock = new ClockImpl(nopFactory,
+        Clock clock = new ClockImpl(mockFactory,
                 sses, 10L, TimeUnit.MILLISECONDS);
 
         clock.addClockListener(null);
@@ -508,7 +440,7 @@ public class ClockTest {
 
     @Test(expectedExceptions = ClockAlreadyStartedException.class)
     public void addClockListenerCL_startedClock() {
-        Clock clock = new ClockImpl(nopFactory,
+        Clock clock = new ClockImpl(mockFactory,
                 sses, 10L, TimeUnit.MILLISECONDS);
 
         clock.startClock();
@@ -518,70 +450,10 @@ public class ClockTest {
 
     @Test
     public void addClockListenerCL_stoppedClock_throwsNothing() {
-        Clock clock = new ClockImpl(nopFactory,
+        Clock clock = new ClockImpl(mockFactory,
                 sses, 10L, TimeUnit.SECONDS);
 
         clock.addClockListener(() -> { });
-    }
-
-    @Test
-    public void wrapToClockException_ClockException() {
-        ClockException clockExcep = new ClockException();
-        ExecutionException execExcep = new ExecutionException(clockExcep);
-
-        ClockException wrapped = ClockImpl.wrapToClockException(execExcep);
-
-        Assert.assertSame(wrapped, clockExcep);
-    }
-
-    @Test
-    public void wrapToClockException_ClockRuntimeException() {
-        ClockException clockExcep = new ClockException();
-        ClockRuntimeException clockRunExcep = new ClockRuntimeException(clockExcep);
-        ExecutionException execExcep = new ExecutionException(clockRunExcep);
-
-        ClockException wrapped = ClockImpl.wrapToClockException(execExcep);
-
-        Assert.assertSame(wrapped, clockExcep);
-    }
-
-    @Test(dataProvider = "runtimeExceptions")
-    public void wrapToClockException_RuntimeException(RuntimeException runExcep) {
-        ExecutionException execExcep = new ExecutionException(runExcep);
-
-        ClockException wrapped = ClockImpl.wrapToClockException(execExcep);
-        Throwable cause = wrapped.getCause();
-
-        Assert.assertSame(cause, runExcep);
-    }
-
-    @DataProvider(name = "runtimeExceptions")
-    public Object[][] getRuntimeExceptions() {
-        return new Object[][]{
-                { new NullPointerException() }, { new IllegalArgumentException() },
-                { new ArrayIndexOutOfBoundsException() }, { new RuntimeException() },
-                { new NumberFormatException() }, { new ClassCastException() }
-        };
-    }
-
-    @Test(dataProvider = "checkedExceptions")
-    public void wrapToClockException_CheckedException(Exception checkedExcep) {
-        ExecutionException execExcep = new ExecutionException(checkedExcep);
-
-        ClockException wrapped = ClockImpl.wrapToClockException(execExcep);
-        Throwable cause = wrapped.getCause();
-
-        Assert.assertSame(cause, checkedExcep);
-    }
-
-    @DataProvider(name = "checkedExceptions")
-    public Object[][] getCheckedExceptions() {
-        return new Object[][] {
-                { new CloneNotSupportedException() }, { new FileNotFoundException() },
-                { new Exception() }, { new IOException() }, { new MalformedURLException() },
-                { new SQLException() }, {new InterruptedException() },
-                { new NoSuchMethodException() }, { new ClassNotFoundException() }
-        };
     }
 
 }

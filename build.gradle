@@ -14,6 +14,7 @@ allprojects {
             property "sonar.jdbc.password", "sonarqube"
             property "sonar.jdbc.url","jdbc:postgresql://rexis-server/sonarqube"
             property "sonar.jacoco.reportPath", "$buildDir/jacoco/jacocoTest.exec"
+            property "sonar.host.url", "http://regina:9000"
             //property "sonar.analysis.mode", "incremental"
         }
     }

@@ -24,10 +24,6 @@ package de.leifaktor.robbie.controllers.clock;
 
 import de.leifaktor.robbie.api.controllers.clock.ClockListener;
 
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -45,11 +41,6 @@ import java.util.concurrent.TimeoutException;
  * Tests the TickEventHandler implementation.
  */
 public class TickEventHandlerTest {
-
-    /**
-     * The Logger for this test.
-     */
-    private static final Logger LOGGER = LoggerFactory.getLogger(TickEventHandlerTest.class);
 
     /**
      * A SequentialExecutorService, which gets set to a new one
