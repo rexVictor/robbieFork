@@ -28,11 +28,14 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import rex.palace.testes.ExecutorServiceState;
 import rex.palace.testes.SequentialExecutorService;
+import rex.palace.testhelp.TestThread;
 
 import java.util.HashSet;
 import java.util.Set;
 
+import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -162,17 +165,23 @@ public class TickEventHandlerTest {
     }
 
     @Test(expectedExceptions = InterruptedException.class)
-    public void shutdown_interrupted() throws TimeoutException, InterruptedException {
-        seqExSer.submitForTerminationInTime(() -> { throw new InterruptedException(); } );
-        try {
-            //Parameters don't matter for this test, since nothing runs parallel.
-            callNothingHandler.shutdown(1L, TimeUnit.MILLISECONDS);
-            Assert.fail("No InterruptedException got thrown.");
-        } catch (InterruptedException e ) {
-            Assert.assertTrue(seqExSer.isShutdown());
-            throw e;
-        }
+    public void shutdown_interrupted() throws Exception {
+        seqExSer.submitForTerminationInTime(() -> null);
+        TestThread testThread = new TestThread(new Callable<Void>() {
 
+            @Override
+            public Void call() throws Exception {
+                Thread.currentThread().interrupt();
+                callNothingHandler.shutdown(1L, TimeUnit.MILLISECONDS);
+                Assert.fail("No InterruptedException got thrown.");
+                return null;
+            }
+        });
+
+        testThread.start();
+        testThread.join();
+        Assert.assertTrue(seqExSer.isShutdown());
+        testThread.finish();
     }
 
     @Test(expectedExceptions = TimeoutException.class)
@@ -191,7 +200,7 @@ public class TickEventHandlerTest {
 
     @Test
     public void areDone_false() {
-        seqExSer.setState(SequentialExecutorService.ExecutorServiceState.NEVER);
+        seqExSer.setState(ExecutorServiceState.NEVER);
 
         callEmptyHandler.run();
 
