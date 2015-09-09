@@ -86,7 +86,7 @@ public class ArgumentConverterTest {
     @Test
     public void convert_list() {
         Object[] testArray =  new Object[]{
-                new Object(), "TestString", new StringBuilder(), new ArgumentConverterTest()
+                new Object(), "TestString1", new StringBuilder(), new ArgumentConverterTest()
         };
         List<Object> testList = Arrays.asList(testArray);
         Iterator<Object[]> toTestIterator = ArgumentConverter.convert(testList);
@@ -104,7 +104,7 @@ public class ArgumentConverterTest {
     @Test
     public void convert_stream() {
         Object[] testArray =  new Object[]{
-                new Object(), "TestString", new StringBuilder(), new ArgumentConverterTest()
+                new Object(), "TestString2", new StringBuilder(), new ArgumentConverterTest()
         };
         Stream<Object> testStream = Arrays.stream(testArray);
         Iterator<Object[]> toTestIterator = ArgumentConverter.convert(testStream);
