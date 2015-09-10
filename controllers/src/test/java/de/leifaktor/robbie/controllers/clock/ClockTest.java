@@ -324,7 +324,6 @@ public class ClockTest {
 
     @Test
     public void startClock_noExceptions() throws ClockException {
-        sses.setCallCount(10);
         tickEventHandlerMock = new TickEventHandlerMock();
         TickEventHandlerFactory factory = set -> tickEventHandlerMock;
         Clock clock = new ClockImpl(factory,
@@ -332,24 +331,26 @@ public class ClockTest {
 
         clock.startClock();
 
+        sses.timePassed(99L, TimeUnit.MILLISECONDS);
+
         Assert.assertEquals(tickEventHandlerMock.count, 10);
         Assert.assertTrue(clock.state());
     }
 
     @Test(expectedExceptions = TicksTooFastException.class)
     public void startClock_NotAllDone() throws ClockException {
-        sses.setCallCount(1);
         tickEventHandlerMock.areDone = false;
         Clock clock = new ClockImpl(mockFactory, sses,
                 7L, TimeUnit.NANOSECONDS);
 
         clock.startClock();
+        sses.timePassed(0L, TimeUnit.NANOSECONDS);
+
         clock.state();
     }
 
     @Test(expectedExceptions = IllegalStateException.class)
     public void state_interrupted() throws Throwable {
-        sses.setCallCount(1);
         Clock clock = new ClockImpl(mockFactory, sses,
                 7L, TimeUnit.NANOSECONDS);
 
@@ -374,7 +375,6 @@ public class ClockTest {
 
     @Test(expectedExceptions = ClockAlreadyStoppedException.class)
     public void stopClock_neverStarted() throws ClockException {
-        sses.setCallCount(10);
         Clock clock = new ClockImpl(mockFactory,
                 sses, 10L, TimeUnit.MILLISECONDS);
 
@@ -383,7 +383,6 @@ public class ClockTest {
 
     @Test
     public void stopClock_regular() throws ClockException {
-        sses.setCallCount(1);
         Clock clock = new ClockImpl(mockFactory,
                 sses, 10L, TimeUnit.MILLISECONDS);
 
@@ -395,7 +394,6 @@ public class ClockTest {
 
     @Test(expectedExceptions = TicksTooFastException.class)
     public void testStopClock_Timeout() throws ClockException {
-        sses.setCallCount(1);
         tickEventHandlerMock.exception = new TimeoutException();
         Clock clock = new ClockImpl(mockFactory, sses, 10L, TimeUnit.MILLISECONDS);
 
@@ -411,7 +409,6 @@ public class ClockTest {
 
     @Test
     public void testStopClock_Interrupted() throws ClockException {
-        sses.setCallCount(1);
         tickEventHandlerMock.exception = new InterruptedException();
         Clock clock = new ClockImpl(mockFactory, sses, 10L, TimeUnit.MILLISECONDS);
 
