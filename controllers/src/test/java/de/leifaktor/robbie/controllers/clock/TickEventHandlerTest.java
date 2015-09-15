@@ -207,7 +207,7 @@ public class TickEventHandlerTest {
         Assert.assertFalse(callEmptyHandler.areDone());
     }
 
-    @Test
+    @Test(enabled = false)
     public void areDone_true() {
         callEmptyHandler.run();
 

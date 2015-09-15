@@ -100,7 +100,7 @@ public class ClockImpl implements Clock {
             long tickDuration, TimeUnit tickDurationUnit) {
         this.tickEventHandlerFactory = Objects.requireNonNull(factory);
         this.scheduler = Objects.requireNonNull(scExSer);
-        ClockImpl.setTickDuration0(this, tickDuration, tickDurationUnit);
+        setTickDuration0(tickDuration, tickDurationUnit);
     }
 
     @Override
@@ -108,7 +108,7 @@ public class ClockImpl implements Clock {
         if (tickEventHandler != null) {
             throw new ClockAlreadyStartedException();
         }
-        ClockImpl.setTickDuration0(this, duration, timeUnit);
+        setTickDuration0(duration, timeUnit);
     }
 
     @Override
@@ -213,14 +213,13 @@ public class ClockImpl implements Clock {
      * @throws NullPointerException if tickEventHandler or unit is null
      * @throws IllegalArgumentException if duration is negative
      */
-    private static void setTickDuration0(
-            ClockImpl clock,
+    private final void setTickDuration0(
             long duration, TimeUnit unit) {
         if (duration < 0) {
             throw new IllegalArgumentException("The duration of a tick may not be negative.");
         }
-        clock.tickDurationUnit = Objects.requireNonNull(unit);
-        clock.tickDuration = duration;
+        tickDurationUnit = Objects.requireNonNull(unit);
+        tickDuration = duration;
     }
 }
 

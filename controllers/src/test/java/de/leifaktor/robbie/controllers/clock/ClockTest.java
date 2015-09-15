@@ -31,7 +31,9 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import rex.palace.testes.SequentialScheduledExecutorService;
+import rex.palace.testes.scheduled.SequentialScheduledExecutorService;
+import rex.palace.testes.scheduled.TimeController;
+import rex.palace.testes.scheduled.TimeControllerImpl;
 import rex.palace.testhelp.ArgumentConverter;
 import rex.palace.testhelp.TestThread;
 
@@ -141,6 +143,8 @@ public class ClockTest {
      */
     private final TickEventHandlerFactory mockFactory = set -> tickEventHandlerMock;
 
+    private TimeController timeController;
+
     /**
      * Default Constructor.
      */
@@ -152,7 +156,8 @@ public class ClockTest {
      */
     @BeforeMethod
     public void initializeInstanceVariables() {
-        sses = new SequentialScheduledExecutorService();
+        timeController = new TimeControllerImpl();
+        sses = new SequentialScheduledExecutorService(timeController);
         tickEventHandlerMock = new TickEventHandlerMock();
     }
 
@@ -331,7 +336,7 @@ public class ClockTest {
 
         clock.startClock();
 
-        sses.timePassed(99L, TimeUnit.MILLISECONDS);
+        timeController.letTimePass(99L, TimeUnit.MILLISECONDS);
 
         Assert.assertEquals(tickEventHandlerMock.count, 10);
         Assert.assertTrue(clock.state());
@@ -344,7 +349,8 @@ public class ClockTest {
                 7L, TimeUnit.NANOSECONDS);
 
         clock.startClock();
-        sses.timePassed(0L, TimeUnit.NANOSECONDS);
+
+        timeController.letTimePass(7L, TimeUnit.NANOSECONDS);
 
         clock.state();
     }
@@ -355,6 +361,7 @@ public class ClockTest {
                 7L, TimeUnit.NANOSECONDS);
 
         clock.startClock();
+        timeController.letTimePass(7L, TimeUnit.NANOSECONDS);
         clock.stopClock();
 
         TestThread thread = new TestThread(new Callable<Void>() {
@@ -387,6 +394,7 @@ public class ClockTest {
                 sses, 10L, TimeUnit.MILLISECONDS);
 
         clock.startClock();
+        timeController.letTimePass(10L, TimeUnit.MILLISECONDS);
         clock.stopClock();
 
         Assert.assertFalse(clock.state());
@@ -400,6 +408,7 @@ public class ClockTest {
         clock.startClock();
 
         try {
+            timeController.letTimePass(10L, TimeUnit.MILLISECONDS);
             clock.stopClock();
         } catch (TicksTooFastException e) {
             Assert.assertFalse(clock.state());
@@ -413,6 +422,7 @@ public class ClockTest {
         Clock clock = new ClockImpl(mockFactory, sses, 10L, TimeUnit.MILLISECONDS);
 
         clock.startClock();
+        timeController.letTimePass(10L, TimeUnit.MILLISECONDS);
         clock.stopClock();
 
         Assert.assertFalse(clock.state());
