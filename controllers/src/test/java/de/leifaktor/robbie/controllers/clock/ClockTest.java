@@ -143,6 +143,9 @@ public class ClockTest {
      */
     private final TickEventHandlerFactory mockFactory = set -> tickEventHandlerMock;
 
+    /**
+     * The TimeController these tests use.
+     */
     private TimeController timeController;
 
     /**

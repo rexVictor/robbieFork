@@ -207,13 +207,12 @@ public class ClockImpl implements Clock {
     /**
      * Sets the tick duration and unit for the given TickEventHandler.
      *
-     * @param clock the Clock to set the duration
      * @param duration the duration to set
      * @param unit the unit to set
      * @throws NullPointerException if tickEventHandler or unit is null
      * @throws IllegalArgumentException if duration is negative
      */
-    private final void setTickDuration0(
+    private void setTickDuration0(
             long duration, TimeUnit unit) {
         if (duration < 0) {
             throw new IllegalArgumentException("The duration of a tick may not be negative.");
