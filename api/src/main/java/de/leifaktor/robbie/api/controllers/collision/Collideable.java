@@ -22,24 +22,22 @@
 
 package de.leifaktor.robbie.api.controllers.collision;
 
-import java.util.Collection;
-
 /**
- * This interface describes what to do when collisions between Entities
- * are detected.
+ * This interface is implemented by all classes which represent an entity which can collide
+ * with another entity.
+ *
+ * <p>All implementations need to specify a CollisionHandler which shall handle collisions.
+ *
+ * @see CollisionHandler
  */
-public interface CollisionDetector {
+public interface Collideable {
 
     /**
-     * Called whenever a collision detection shall be run.
-     *
-     * <p>This method should usually be called every Tick.
-     *
-     * @param collideables the collection of all collideables to check for
-     *        happened collisions
-     * @throws NullPointerException if collideables is null
+     * Returns the current position in the room.
+     * @return a DoublePosition object representing the current position
+     *         of this in a room; it is never null
      */
-    void doDetection(Collection<? extends Collideable> collideables);
+    DoublePosition getPosition();
 
 }
 

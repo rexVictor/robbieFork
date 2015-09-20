@@ -20,27 +20,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package de.leifaktor.robbie.api.controllers.collision;
-
-import java.util.Collection;
-
 /**
- * This interface describes what to do when collisions between Entities
- * are detected.
+ * Provides interfaces for the collision handling.
+ *
+ * <p>The purpose of the controllers is to handle all events and
+ * keep server (the model)  and the clients (the GUI) synchronized.
  */
-public interface CollisionDetector {
-
-    /**
-     * Called whenever a collision detection shall be run.
-     *
-     * <p>This method should usually be called every Tick.
-     *
-     * @param collideables the collection of all collideables to check for
-     *        happened collisions
-     * @throws NullPointerException if collideables is null
-     */
-    void doDetection(Collection<? extends Collideable> collideables);
-
-}
+package de.leifaktor.robbie.api.controllers.collision;
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
