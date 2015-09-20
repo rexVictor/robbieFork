@@ -45,6 +45,11 @@ public class ExceptionConstructorTestTest {
     private static class WrongCauseException extends Exception {
 
         /**
+         * Needed for possible serialization.
+         */
+        private static final long serialVersionUID = 19L;
+
+        /**
          * Creates a new WrongCauseException which does not use its parameter
          * as cause.
          *
@@ -62,6 +67,11 @@ public class ExceptionConstructorTestTest {
     private static class ExceptionThrowingException extends Exception {
 
         /**
+         * Needed for possible serialization.
+         */
+        private static final long serialVersionUID = 1L;
+
+        /**
          * Creates a new ExceptionThrowingException.
          */
         ExceptionThrowingException() {
@@ -74,6 +84,11 @@ public class ExceptionConstructorTestTest {
      * An Exception which does not have the correct message.
      */
     private static class WrongMessageException extends Exception {
+
+        /**
+         * Needed for possible serialization.
+         */
+        private static final long serialVersionUID = 2L;
 
         /**
          * Creates a new WrongMessageException.
@@ -92,6 +107,11 @@ public class ExceptionConstructorTestTest {
     private static class ShouldHaveNoMessageException extends Exception {
 
         /**
+         * Needed for possible serialization.
+         */
+        private static final long serialVersionUID = 3L;
+
+        /**
          * Creates a new ShouldHaveNoMessageException.
          */
         ShouldHaveNoMessageException() {
@@ -103,6 +123,11 @@ public class ExceptionConstructorTestTest {
      * An Exception API conform extension.
      */
     private static class EmptyException extends Exception {
+
+        /**
+         * Needed for possible serialization.
+         */
+        private static final long serialVersionUID = 4L;
 
         /**
          * Creates a new Exception API conform instance.
@@ -117,6 +142,11 @@ public class ExceptionConstructorTestTest {
      * An Exception API conform extension.
      */
     private static class EmptyStringException extends Exception {
+
+        /**
+         * Needed for possible serialization.
+         */
+        private static final long serialVersionUID = 5L;
 
         /**
          * Creates a new Exception API conform instance.
@@ -142,6 +172,11 @@ public class ExceptionConstructorTestTest {
     private static class EmptyThrowableException extends Exception {
 
         /**
+         * Needed for possible serialization.
+         */
+        private static final long serialVersionUID = 6L;
+
+        /**
          * Creates a new Exception API conform instance.
          */
         EmptyThrowableException() {
@@ -163,6 +198,11 @@ public class ExceptionConstructorTestTest {
      * An Exception API conform extension.
      */
     private static class EmptyBothException extends Exception {
+
+        /**
+         * Needed for possible serialization.
+         */
+        private static final long serialVersionUID = 7L;
 
         /**
          * Creates a new Exception API conform instance.
@@ -187,6 +227,11 @@ public class ExceptionConstructorTestTest {
      * An Exception API conform extension.
      */
     private static class EmptyStringThrowableException extends Exception {
+
+        /**
+         * Needed for possible serialization.
+         */
+        private static final long serialVersionUID = 8L;
 
         /**
          * Creates a new Exception API conform instance.
@@ -221,6 +266,11 @@ public class ExceptionConstructorTestTest {
     private static class EmptyStringBothException extends Exception {
 
         /**
+         * Needed for possible serialization.
+         */
+        private static final long serialVersionUID = 9L;
+
+        /**
          * Creates a new Exception API conform instance.
          */
         EmptyStringBothException() {
@@ -251,6 +301,11 @@ public class ExceptionConstructorTestTest {
      * An Exception API conform extension.
      */
     private static class EmptyThrowableBothException extends Exception {
+
+        /**
+         * Needed for possible serialization.
+         */
+        private static final long serialVersionUID = 10L;
 
         /**
          * Creates a new Exception API conform instance.
@@ -285,6 +340,11 @@ public class ExceptionConstructorTestTest {
     private static class StringException extends Exception {
 
         /**
+         * Needed for possible serialization.
+         */
+        private static final long serialVersionUID = 11L;
+
+        /**
          * Creates a new Exception API conform instance.
          *
          * @param message the message to use
@@ -299,6 +359,11 @@ public class ExceptionConstructorTestTest {
      * An Exception API conform extension.
      */
     private static class StringThrowableException extends Exception {
+
+        /**
+         * Needed for possible serialization.
+         */
+        private static final long serialVersionUID = 12L;
 
         /**
          * Creates a new Exception API conform instance.
@@ -326,6 +391,11 @@ public class ExceptionConstructorTestTest {
     private static class StringBothException extends Exception {
 
         /**
+         * Needed for possible serialization.
+         */
+        private static final long serialVersionUID = 13L;
+
+        /**
          * Creates a new Exception API conform instance.
          *
          * @param message the message to use
@@ -350,6 +420,11 @@ public class ExceptionConstructorTestTest {
      * An Exception API conform extension.
      */
     private static class StringThrowableBothException extends Exception {
+
+        /**
+         * Needed for possible serialization.
+         */
+        private static final long serialVersionUID = 14L;
 
         /**
          * Creates a new Exception API conform instance.
@@ -387,6 +462,11 @@ public class ExceptionConstructorTestTest {
     private static class ThrowableException extends Exception {
 
         /**
+         * Needed for possible serialization.
+         */
+        private static final long serialVersionUID = 15L;
+
+        /**
          * Creates a new Exception API conform instance.
          *
          * @param cause the cause of this exception
@@ -401,6 +481,11 @@ public class ExceptionConstructorTestTest {
      * An Exception API conform extension.
      */
     private static class ThrowableBothException extends Exception {
+
+        /**
+         * Needed for possible serialization.
+         */
+        private static final long serialVersionUID = 16L;
 
         /**
          * Creates a new Exception API conform instance.
@@ -429,6 +514,11 @@ public class ExceptionConstructorTestTest {
     private static class BothException extends Exception {
 
         /**
+         * Needed for possible serialization.
+         */
+        private static final long serialVersionUID = 17L;
+
+        /**
          * Creates a new Exception API conform instance.
          *
          * @param message the message to use
@@ -444,6 +534,11 @@ public class ExceptionConstructorTestTest {
      * An Exception API conform extension.
      */
     private static class WeirdException extends Exception {
+
+        /**
+         * Needed for possible serialization.
+         */
+        private static final long serialVersionUID = 18L;
 
         /**
          * Creates a new Exception API conform instance.
