@@ -37,13 +37,13 @@ public interface CollisionHandlerProvider {
     /**
      * Returns a CollisionHandler handling the arguments.
      *
-     * @param c1 one of the Collideables colliding
-     * @param c2 the other one
      * @param <V> the type of c1
      * @param <W> the type of c2
+     * @param c1 one of the Collideables colliding
+     * @param c2 the other one
      * @return a CollisionHandler for c1 and c2; never null
      */
-    <V extends Collideable, W extends Collideable> CollisionHandler<V,W>
+    <V extends Collideable, W extends Collideable> CollisionHandler<? super V, ? super W>
                 getHandlerFor(V c1, W c2);
 
     /**

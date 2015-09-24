@@ -47,16 +47,15 @@ public class CollisionHandlerProviderImpl implements CollisionHandlerProvider {
     }
 
     @Override
-    public <V extends Collideable, W extends Collideable> CollisionHandler<V, W>
+    public <V extends Collideable, W extends Collideable> CollisionHandler<? super V, ? super W>
                 getHandlerFor(V c1, W c2) {
         //This is ridiculous: c1.getClass() returns an object of
-        //type Class<? extends Collideable> instead of Class<V>.
+        //type Class<? extends Collideable> instead of Class<V> or at least
+        //Class<? extends V>
         //One might expect the compiler to be a little smarter...
         //If someone has a solution doing this without casting, feel free to contact me
         //I hate casting(-shows)...
-        @SuppressWarnings("unchecked")
         Class<V> clazz1 = (Class<V>) c1.getClass();
-        @SuppressWarnings("unchecked")
         Class<W> clazz2 = (Class<W>) c2.getClass();
         return classMap.get(clazz1, clazz2);
     }

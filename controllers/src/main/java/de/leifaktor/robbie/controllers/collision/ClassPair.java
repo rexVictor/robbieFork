@@ -59,7 +59,8 @@ public class ClassPair<S, V extends S, W extends S> {
      * Returns true if and only if other is equal to this.
      *
      * <p>Two ClassPairs are considered equal if and only if
-     * the contain the same Class objects regardless of their order.
+     * they contain the same Class objects regardless of their order.
+     *
      * @param other the object to check equality for
      * @return if other is equal to this
      */
@@ -87,3 +88,4 @@ public class ClassPair<S, V extends S, W extends S> {
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
+
