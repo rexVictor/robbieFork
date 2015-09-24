@@ -43,7 +43,7 @@ public interface CollisionHandlerProvider {
      * @param c2 the other one
      * @return a CollisionHandler for c1 and c2; never null
      */
-    <V extends Collideable, W extends Collideable> CollisionHandler<? super V, ? super W>
+    <V extends Collideable, W extends Collideable> CollisionHandler<V, W>
                 getHandlerFor(V c1, W c2);
 
     /**

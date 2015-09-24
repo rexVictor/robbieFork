@@ -66,7 +66,7 @@ public class ClassMap {
      * @param <W> the type of the other Collideable subclass
      */
     public <V extends Collideable, W extends Collideable> void put(
-            Class<V> clazz1, Class<W> clazz2, CollisionHandler<? super V, ? super W> handler) {
+            Class<V> clazz1, Class<W> clazz2, CollisionHandler<V, W> handler) {
         CollideableClassPair<V, W> pair = new CollideableClassPair<>(clazz1, clazz2);
         map.put(pair,handler);
     }
@@ -83,12 +83,12 @@ public class ClassMap {
      * @return a CollisionHandler&lt;T,U&gt;
      */
     public <T extends Collideable, U extends Collideable>
-            CollisionHandler<? super T, ? super U> get(
+            CollisionHandler<T, U> get(
             Class<T> clazz1, Class<U> clazz2) {
         CollideableClassPair<T, U> pair = new CollideableClassPair<>(clazz1, clazz2);
         //Implementation of put(.,.,.) guarantees this cast to be valid
         //If someone has a solution doing this without casting feel free to contact me
-        return (CollisionHandler<? super T, ? super U>) map.get(pair);
+        return (CollisionHandler<T, U>) map.get(pair);
     }
 
 }

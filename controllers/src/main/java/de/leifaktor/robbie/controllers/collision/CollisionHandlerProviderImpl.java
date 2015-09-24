@@ -47,7 +47,7 @@ public class CollisionHandlerProviderImpl implements CollisionHandlerProvider {
     }
 
     @Override
-    public <V extends Collideable, W extends Collideable> CollisionHandler<? super V, ? super W>
+    public <V extends Collideable, W extends Collideable> CollisionHandler<V, W>
                 getHandlerFor(V c1, W c2) {
         //This is ridiculous: c1.getClass() returns an object of
         //type Class<? extends Collideable> instead of Class<V> or at least
