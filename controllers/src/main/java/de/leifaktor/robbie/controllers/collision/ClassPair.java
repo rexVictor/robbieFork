@@ -82,10 +82,9 @@ public class ClassPair<S, V extends S, W extends S> {
 
     @Override
     public int hashCode() {
-        return clazz1.hashCode() ^ clazz2.hashCode();
+        return clazz1.hashCode() + clazz2.hashCode();
     }
 
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
-
