@@ -27,6 +27,10 @@ subprojects {
     apply plugin : 'findbugs'
     apply plugin : 'jacoco'
 
+    jacoco {
+        toolVersion = "0.7.5.201505241946"
+    }
+
     dependencies {
         testCompile "org.testng:testng:+"
         compile "org.slf4j:slf4j-api:+"
