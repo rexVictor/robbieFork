@@ -27,12 +27,7 @@ import de.leifaktor.robbie.api.domain.Item;
 /**
  * The base class for all items.
  */
-public abstract class ItemImpl implements Item {
-
-    /**
-     * A unique id among all item instances.
-     */
-    private final long id;
+public abstract class ItemImpl extends IdClass implements Item {
 
     /**
      * The weight of this item.
@@ -46,7 +41,7 @@ public abstract class ItemImpl implements Item {
      * @param weight the weight of this item
      */
     public ItemImpl(long id, double weight) {
-        this.id = id;
+        super(id);
         this.weight = weight;
     }
 

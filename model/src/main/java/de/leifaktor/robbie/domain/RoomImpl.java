@@ -30,12 +30,7 @@ import java.util.List;
 /**
  * Room is a wrapper object for fields.
  */
-public class RoomImpl implements Room {
-
-    /**
-     * A unique id among all room instances belonging to a floor.
-     */
-    private final long id;
+public class RoomImpl extends IdClass implements Room {
 
     /**
      * The number of Fields each row in each layer has.
@@ -68,10 +63,10 @@ public class RoomImpl implements Room {
      * @throws IndexOutOfBoundsException if layers is empty or width or height is not positive.
      */
     public RoomImpl(long id, int width, int height, List<Layer> layers) {
+        super(id);
         if (layers.isEmpty() || width <= 0 || height <= 0) {
             throw new IndexOutOfBoundsException();
         }
-        this.id = id;
         this.width = width;
         this.height = height;
         this.layers = layers;

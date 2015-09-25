@@ -27,22 +27,18 @@ import de.leifaktor.robbie.api.domain.Field;
 import de.leifaktor.robbie.api.domain.Item;
 import de.leifaktor.robbie.api.domain.Tile;
 
-import java.util.Stack;
+import java.util.ArrayDeque;
+import java.util.Deque;
 
 /**
  * Field is the leaf object in the world.
  */
-public class FieldImpl implements Field {
-
-    /**
-     * A unique id among all fields of a layer.
-     */
-    private final long id;
+public class FieldImpl extends IdClass implements Field {
 
     /**
      * The item stack.
      */
-    private final Stack<Item> items = new Stack<>();
+    private final Deque<Item> items = new ArrayDeque<>();
 
     /**
      * The creature currently on this field.
@@ -62,7 +58,7 @@ public class FieldImpl implements Field {
      * @param id a unique id among all fields of a layer. Uniqueness is not checked.
      */
     public FieldImpl(long id) {
-        this.id = id;
+        super(id);
     }
 
     @Override
@@ -76,7 +72,7 @@ public class FieldImpl implements Field {
     }
 
     @Override
-    public Stack<Item> getItems() {
+    public Deque<Item> getItems() {
         return items;
     }
 

@@ -15,29 +15,38 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 package de.leifaktor.robbie.domain;
 
-import de.leifaktor.robbie.api.domain.Creature;
-
-
 /**
- * The base class for all creatures.
+ * A class which holds a long id value.
  */
-public abstract class CreatureImpl extends IdClass implements Creature {
+public class IdClass {
 
     /**
-     * Creates a new creature with the specified id.
-     *
-     * @param id a unique id among all creatures instances. Uniqueness is not checked.
+     * A unique id.
      */
-    public CreatureImpl(long id) {
-        super(id);
+    private final long id;
+
+    /**
+     * Creates a new IdClass object.
+     *
+     * @param id a uniqe id. Uniqueness is not checked.
+     */
+    public IdClass(long id) {
+        this.id = id;
     }
 
+    /**
+     * Returns the id.
+     *
+     * @return the id
+     */
+    public long getId() {
+        return id;
+    }
 }
-/* vim:set shiftwidth=4 softtabstop=4 expandtab: */

@@ -37,7 +37,7 @@ public abstract class TileImpl implements Tile {
      * Creates a new Tile.
      */
     public TileImpl() {
-
+        super();
     }
 
 }

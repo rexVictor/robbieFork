@@ -34,6 +34,7 @@ final class Validators {
      * Private constructor, since there are only static methods.
      */
     private Validators() {
+        super();
     }
 
     /**

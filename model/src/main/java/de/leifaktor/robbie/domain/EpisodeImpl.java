@@ -32,12 +32,7 @@ import java.util.List;
  *
  * <p>It stores all {@link Floor}s.
  */
-public class EpisodeImpl implements Episode {
-
-    /**
-     * Unique id among Episode instances.
-     */
-    private final long id;
+public class EpisodeImpl extends IdClass implements Episode {
 
     /**
      * List of Floors.
@@ -56,10 +51,10 @@ public class EpisodeImpl implements Episode {
      * @throws IndexOutOfBoundsException if floors is empty.
      */
     public EpisodeImpl(long id, List<Floor> floors) {
+        super(id);
         if (floors.isEmpty()) {
             throw new IndexOutOfBoundsException();
         }
-        this.id = id;
         this.floors = floors;
     }
 

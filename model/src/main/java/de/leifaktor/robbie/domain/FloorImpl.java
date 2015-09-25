@@ -33,12 +33,7 @@ import java.util.List;
  *
  * <p>This contains all Rooms and provides access to them.
  */
-public class FloorImpl implements Floor {
-
-    /**
-     * A unique id among all floor instances belonging to an episode.
-     */
-    private final long id;
+public class FloorImpl extends IdClass implements Floor {
 
     /**
      * A list of list of rooms.
@@ -60,7 +55,7 @@ public class FloorImpl implements Floor {
      *         do not have same length
      */
     public FloorImpl(long id, List<List<Room>> rooms) {
-        this.id = id;
+        super(id);
         this.rooms = Validators.requireNonNullAndSameSize(rooms);
     }
 

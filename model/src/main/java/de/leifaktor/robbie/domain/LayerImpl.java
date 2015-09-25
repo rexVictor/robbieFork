@@ -32,12 +32,7 @@ import java.util.List;
  *
  * <p>This contains all fields and provides access to them.
  */
-public class LayerImpl implements Layer {
-
-    /**
-     * A unique ID among all layers of a Room.
-     */
-    private final long id;
+public class LayerImpl extends IdClass implements Layer {
 
     /**
      * A list of list of all fields.
@@ -61,7 +56,7 @@ public class LayerImpl implements Layer {
      *         do not have same length
      */
     public LayerImpl(long id, List<List<Field>> fields) {
-        this.id = id;
+        super(id);
         this.fields = Validators.requireNonNullAndSameSize(fields);
     }
 
