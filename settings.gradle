@@ -1,1 +1,1 @@
-include 'api', 'model', 'controllers', 'testes', 'testhelp'
+include 'api', 'model', 'controllers'

@@ -7,6 +7,7 @@ plugins {
 allprojects {
     repositories {
         mavenCentral()
+        maven { url "https://jitpack.io" }
     }
     sonarqube {
         properties {
@@ -33,6 +34,8 @@ subprojects {
 
     dependencies {
         testCompile "org.testng:testng:+"
+        testCompile 'com.github.rexVictor:testHelp:-SNAPSHOT'
+        testCompile 'com.github.rexVictor:ScheduledExecutorService:-SNAPSHOT'
         compile "org.slf4j:slf4j-api:+"
         compile "ch.qos.logback:logback-classic:+"
     }
@@ -67,30 +70,15 @@ task docs(type: Javadoc) {
         project.sourceSets.main.compileClasspath})
 }
 
-project(':testes') {
-    dependencies {
-        testCompile project(':testhelp')
-    }
-}
-
-project(':api') {
-    dependencies {
-        testCompile project(':testhelp')
-    }
-}
-
 project(':model') {
     dependencies {
         compile project(':api')
-        testCompile project(':testhelp')
     }
 }
 
 project(':controllers') {
     dependencies {
         compile project(':api')
-        testCompile project(':testes')
-        testCompile project(':testhelp')
     }
 }
 // vim:set shiftwidth=4 softtabstop=4 expandtab:
