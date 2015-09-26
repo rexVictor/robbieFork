@@ -35,7 +35,7 @@ subprojects {
     dependencies {
         testCompile "org.testng:testng:+"
         testCompile 'com.github.rexVictor:testHelp:-SNAPSHOT'
-        testCompile 'com.github.rexVictor:ScheduledExecutorService:-SNAPSHOT'
+        testCompile 'com.github.rexVictor:SequentialExecutorService:-SNAPSHOT'
         compile "org.slf4j:slf4j-api:+"
         compile "ch.qos.logback:logback-classic:+"
     }
