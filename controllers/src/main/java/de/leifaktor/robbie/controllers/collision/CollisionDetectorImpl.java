@@ -68,7 +68,7 @@ public class CollisionDetectorImpl implements CollisionDetector {
     public void doDetection(Collection<? extends Collideable> collideables) {
         collideables.stream().flatMap(c1 ->
                 collideables.stream().map(c2 -> makePair(c1, c2)))
-                .filter(pair -> pair.distance() <= limit)
+                .filter(pair -> pair.distance() < limit)
                 .forEach(pair -> pair.collide(provider));
     }
 
