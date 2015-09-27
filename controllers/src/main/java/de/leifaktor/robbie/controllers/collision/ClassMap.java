@@ -22,6 +22,8 @@
 
 package de.leifaktor.robbie.controllers.collision;
 
+import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.Table;
 import de.leifaktor.robbie.api.controllers.collision.Collideable;
 import de.leifaktor.robbie.api.controllers.collision.CollisionHandler;
 
@@ -42,10 +44,10 @@ import java.util.Map;
 public class ClassMap {
 
     /**
-     * The map this wraps.
+     * The Table containing the CollisionHandlers.
      */
-    private Map<CollideableClassPair<?, ?>, CollisionHandler<?,?>> map
-            = new HashMap<>();
+    private Table<Class<? extends Collideable>, Class<? extends Collideable>, CollisionHandler<?,?>>
+        handlers = HashBasedTable.create();
 
     /**
      * Creates a new ClassMap.
@@ -67,8 +69,7 @@ public class ClassMap {
      */
     public <V extends Collideable, W extends Collideable> void put(
             Class<V> clazz1, Class<W> clazz2, CollisionHandler<V, W> handler) {
-        CollideableClassPair<V, W> pair = new CollideableClassPair<>(clazz1, clazz2);
-        map.put(pair,handler);
+        handlers.put(clazz1, clazz2, handler);
     }
 
     /**
@@ -82,13 +83,13 @@ public class ClassMap {
      * @param <U> the type of the other Collideable subclass
      * @return a CollisionHandler&lt;T,U&gt;
      */
+    @SuppressWarnings("unchecked")
     public <T extends Collideable, U extends Collideable>
             CollisionHandler<T, U> get(
             Class<T> clazz1, Class<U> clazz2) {
-        CollideableClassPair<T, U> pair = new CollideableClassPair<>(clazz1, clazz2);
         //Implementation of put(.,.,.) guarantees this cast to be valid
         //If someone has a solution doing this without casting feel free to contact me
-        return (CollisionHandler<T, U>) map.get(pair);
+        return (CollisionHandler<T, U>) handlers.get(clazz1, clazz2);
     }
 
 }
