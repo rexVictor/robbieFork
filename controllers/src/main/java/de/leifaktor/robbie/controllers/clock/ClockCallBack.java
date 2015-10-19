@@ -15,28 +15,37 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 package de.leifaktor.robbie.controllers.clock;
 
-/**
- * Indicating that the Clock is already stopped.
- */
-public class ClockAlreadyStoppedException extends RuntimeException {
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+import de.leifaktor.robbie.api.controllers.clock.Clock;
+import de.leifaktor.robbie.api.controllers.clock.ClockRestorer;
 
-    /**
-     * Needed for possible serialization.
-     */
-    private static final long serialVersionUID = 0xc2fd1a16d7efe8ffL;
+import java.util.Objects;
+import java.util.concurrent.ExecutorService;
 
-    /**
-     * Creates a new ClockAlreadyStoppedException.
-     */
-    public ClockAlreadyStoppedException() {
+public interface ClockCallBack<T> extends FutureCallback<T> {
+
+    @Override
+    default void onSuccess(T result) {
+        //can't happen
     }
-}
 
-/* vim:set shiftwidth=4 softtabstop=4 expandtab: */
+    @Override
+    public void onFailure(Throwable t);
+
+    static <T> void addCallback(
+            ListenableFuture<T> future,
+            ClockCallBack<T> callBack,
+            ExecutorService executor) {
+        Futures.addCallback(future, callBack, executor);
+    }
+
+}

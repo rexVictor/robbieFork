@@ -35,14 +35,12 @@ public interface ClockRestorer {
      * <p>This method must stop the clock and restart it, after
      * handling the exception or rethrow the exception.
      *
-     * <p>Usually this should call clock.state() which will throw the
-     * occurred exception.
-     *
      * <p>Note: This method can be run in its own thread.
      *
      * @param clock the clock which threw the exception
+     * @param exception the occurred Exception
      */
-    void exceptionHappened(Clock clock);
+    void exceptionHappened(Clock clock, Throwable exception);
 
 }
 

@@ -90,7 +90,7 @@ public class ClockExceptionHandler implements Runnable {
         this.service = Objects.requireNonNull(service, "The ExecutorService may not be null.");
         Objects.requireNonNull(clock, "The Clock may not be null.");
         Objects.requireNonNull(restorer, "The ClockRestorer may not be null.");
-        this.clockRestorer = () -> restorer.exceptionHappened(clock) ;
+        this.clockRestorer = () -> restorer.exceptionHappened(clock, null) ;
     }
 
     @Override

@@ -22,22 +22,20 @@
 
 package de.leifaktor.robbie.controllers.clock;
 
+import com.google.common.util.concurrent.ListenableScheduledFuture;
+import com.google.common.util.concurrent.ListeningScheduledExecutorService;
+import com.google.common.util.concurrent.MoreExecutors;
+
 import de.leifaktor.robbie.api.controllers.clock.Clock;
-import de.leifaktor.robbie.api.controllers.clock.ClockException;
 import de.leifaktor.robbie.api.controllers.clock.ClockListener;
-import de.leifaktor.robbie.api.controllers.clock.TicksTooFastException;
+import de.leifaktor.robbie.api.controllers.clock.ClockRestorer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 /**
  * Implements the Clock interface thread-safe.
@@ -47,12 +45,18 @@ public class ClockImpl implements Clock {
     /**
      * The Logger for this clock implementation.
      */
-    private static final Logger LOGGER = LoggerFactory.getLogger(Clock.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClockImpl.class);
+
+    private final ClockListener clockListener;
 
     /**
-     * The ClockListeners called on every tick.
+     * The ExecutorService for the ticks.
      */
-    private final List<ClockListener> listeners = new LinkedList<>();
+    private final ListeningScheduledExecutorService executor;
+
+    private final ClockRestorer restorer;
+
+    private ClockState clockState = ClockState.STOPPED;
 
     /**
      * The duration of a tick.
@@ -65,117 +69,114 @@ public class ClockImpl implements Clock {
     private TimeUnit tickDurationUnit;
 
     /**
-     * The ExecutorService for the ticks.
-     */
-    private final ScheduledExecutorService scheduler;
-
-    /**
      * The current periodic fireTickEvent caller.
      */
-    private ScheduledFuture<?> callerHandle;
-
-    /**
-     * The TickEventHandlerFactory to be used.
-     */
-    private final TickEventHandlerFactory tickEventHandlerFactory;
-
-    /**
-     * The current TickEventHandler.
-     */
-    private TickEventHandler tickEventHandler;
+    private ListenableScheduledFuture<?> callerHandle;
 
     /**
      * Creates a new Clock.
      *
-     * @param factory the TickEventHandlerFactory to be used
-     * @param scExSer the scheduledExecutorService to schedule this Clock in.
+     * @param executor the scheduledExecutorService to schedule this Clock in.
      *                It may get shutdown.
      * @param tickDuration the duration of a tick
      * @param tickDurationUnit the unit of tickDuration
+     * @param restorer
      * @throws NullPointerException if tickDurationUnit is null
      * @throws IllegalArgumentException if tickDuration is not positive
      */
-    public ClockImpl(TickEventHandlerFactory factory,
-            ScheduledExecutorService scExSer,
-            long tickDuration, TimeUnit tickDurationUnit) {
-        this.tickEventHandlerFactory = Objects.requireNonNull(factory);
-        this.scheduler = Objects.requireNonNull(scExSer);
+    public ClockImpl(ScheduledExecutorService executor,
+                     long tickDuration, TimeUnit tickDurationUnit,
+                     ClockRestorer restorer, ClockListener clockListener) {
+        this.restorer = Objects.requireNonNull(restorer);
+        this.executor = MoreExecutors.listeningDecorator(executor);
+        this.clockListener = Objects.requireNonNull(clockListener);
         setTickDuration0(tickDuration, tickDurationUnit);
+    }
+
+    private void throwExceptionIfShutdown() {
+        if (clockState == ClockState.SHUTDOWN) {
+            throw new IllegalStateException("Clock has been shutdown.");
+        }
     }
 
     @Override
     public void setTickDuration(long duration, TimeUnit timeUnit) {
-        if (tickEventHandler != null) {
-            throw new ClockAlreadyStartedException();
+        throwExceptionIfShutdown();
+        if (clockState != ClockState.PAUSED && clockState != ClockState.STOPPED) {
+            throw new IllegalStateException("Clock is running.");
         }
         setTickDuration0(duration, timeUnit);
     }
 
     @Override
-    public void addClockListener(ClockListener listener) {
-        if (tickEventHandler != null) {
-            throw new ClockAlreadyStartedException();
+    public void shutdown() {
+        throwExceptionIfShutdown();
+        if (clockState != ClockState.STOPPED) {
+            throw new IllegalStateException("Clock is not stopped.");
         }
-        listeners.add(Objects.requireNonNull(listener));
+        executor.shutdown();
+        try {
+            executor.awaitTermination(tickDuration, tickDurationUnit);
+        } catch (InterruptedException e) {
+            LOGGER.debug("Got interrupted during shutdown.", e);
+        }
+        finally {
+            executor.shutdownNow();
+        }
+        clockState = ClockState.SHUTDOWN;
     }
 
     @Override
     public void startClock() {
-        if (tickEventHandler != null) {
-            throw new ClockAlreadyStartedException();
+        throwExceptionIfShutdown();
+        if (clockState != ClockState.STOPPED) {
+            throw new IllegalStateException("Clock is not stopped.");
         }
-        tickEventHandler = tickEventHandlerFactory.create(listeners);
-        callerHandle = scheduler.scheduleAtFixedRate(this::fireEvents, 0,
-                tickDuration, tickDurationUnit);
-    }
-
-    /**
-     * Fires the events.
-     */
-    private void fireEvents() {
-        if (!tickEventHandler.areDone()) {
-            ClockException cause = new TicksTooFastException(
-                    "Tasks of previous tick haven't finished.");
-            throw new ClockRuntimeException(cause);
-        }
-        tickEventHandler.run();
+        clockState = ClockState.PAUSED;
+        resumeClock();
     }
 
     @Override
-    public void stopClock() throws ClockException {
-        if (tickEventHandler == null) {
-            throw new ClockAlreadyStoppedException();
+    public void stopClock() {
+        throwExceptionIfShutdown();
+        if (clockState == ClockState.STOPPED) {
+            throw new IllegalStateException("Clock is already stopped");
+        }
+        if (clockState == ClockState.RUNNING) {
+            pauseClock();
+        }
+        //Clock is guaranteed paused.
+        clockState = ClockState.STOPPED;
+    }
+
+    @Override
+    public void pauseClock() {
+        throwExceptionIfShutdown();
+        if (clockState != ClockState.RUNNING) {
+            throw new IllegalStateException("Clock is not running.");
         }
         callerHandle.cancel(false);
-        try {
-            tickEventHandler.shutdown(tickDuration, tickDurationUnit);
-        } catch (TimeoutException e) {
-            LOGGER.debug("Got TimeoutException.", e);
-            throw new TicksTooFastException("Tasks didn't stop in time.");
-        } catch (InterruptedException e) {
-            LOGGER.error("Got interrupted stopping the clock.", e);
-        } finally {
-            tickEventHandler = null;
+        clockState = ClockState.PAUSED;
+    }
+
+    @Override
+    public void resumeClock() {
+        throwExceptionIfShutdown();
+        if (clockState != ClockState.PAUSED) {
+            throw new IllegalStateException("Clock is not paused.");
         }
+        callerHandle = executor.scheduleAtFixedRate(clockListener::ticksPassed, 0,
+                tickDuration, tickDurationUnit);
+        ClockCallBack.addCallback(
+                callerHandle, throwable -> restorer.exceptionHappened(this, throwable),
+                executor);
+        clockState = ClockState.RUNNING;
     }
 
 
     @Override
-    public boolean state() throws ClockException {
-        if (!callerHandle.isDone()) {
-            return true;
-        }
-        try {
-            callerHandle.get();
-            return false;
-        } catch (InterruptedException e) {
-            LOGGER.error("This can't happen, since callerHandle is done.", e);
-            Thread.currentThread().interrupt();
-            throw new IllegalStateException(e);
-        } catch (ExecutionException e) {
-            LOGGER.debug("Execution Exception in clock.", e);
-            throw ClockImpl.wrapToClockException(e);
-        }
+    public ClockState state() {
+        return clockState;
     }
 
     @Override
@@ -183,25 +184,14 @@ public class ClockImpl implements Clock {
         return unit.convert(tickDuration, tickDurationUnit);
     }
 
-    /**
-     * Wraps the exception in a ClockException.
-     *
-     * <p>If the cause of the exception is of type ClockRuntimeException it returns the causing
-     * ClockException. If the cause of the exception is of type ClockException it simply returns
-     * it. Otherwise it constructs a new ClockException with the cause as cause.
-     *
-     * @param execExcep the executionException to process
-     * @return a ClockException derived from execExcep
-     */
-    public static ClockException wrapToClockException(ExecutionException execExcep) {
-        Throwable cause = execExcep.getCause();
-        if (cause instanceof ClockRuntimeException) {
-            cause = cause.getCause();
-        }
-        if (cause instanceof ClockException) {
-            return (ClockException) cause;
-        }
-        return new ClockException(cause);
+    @Override
+    public ClockListener getClockListener() {
+        return clockListener;
+    }
+
+    @Override
+    public ClockRestorer getClockRestorer() {
+        return restorer;
     }
 
     /**
@@ -220,7 +210,7 @@ public class ClockImpl implements Clock {
         tickDurationUnit = Objects.requireNonNull(unit);
         tickDuration = duration;
     }
-}
 
+}
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

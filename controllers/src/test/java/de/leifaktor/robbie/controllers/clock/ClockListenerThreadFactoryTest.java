@@ -48,7 +48,7 @@ public class ClockListenerThreadFactoryTest {
     private static class UncaughtExceptionHandlerMock implements Thread.UncaughtExceptionHandler {
 
         /**
-         * The last uncaught exception thrown by a Thread using this handler.
+         * The last uncaught throwable thrown by a Thread using this handler.
          */
         public Throwable uncaughtException;
 

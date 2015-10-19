@@ -28,8 +28,8 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import rex.palace.testes.ExecutorServiceState;
-import rex.palace.testes.SequentialExecutorService;
+import rex.palace.sequentialexecutor.ExecutorServiceState;
+import rex.palace.sequentialexecutor.SequentialExecutorService;
 import rex.palace.testhelp.TestThread;
 
 import java.util.HashSet;
@@ -200,7 +200,7 @@ public class TickEventHandlerTest {
 
     @Test
     public void areDone_false() {
-        seqExSer.setState(ExecutorServiceState.NEVER);
+        seqExSer.setExecutorServiceState(ExecutorServiceState.NEVER);
 
         callEmptyHandler.run();
 

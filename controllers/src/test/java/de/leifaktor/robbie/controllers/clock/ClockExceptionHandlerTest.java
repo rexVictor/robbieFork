@@ -23,7 +23,6 @@
 package de.leifaktor.robbie.controllers.clock;
 
 import de.leifaktor.robbie.api.controllers.clock.Clock;
-import de.leifaktor.robbie.api.controllers.clock.ClockException;
 import de.leifaktor.robbie.api.controllers.clock.ClockListener;
 import de.leifaktor.robbie.api.controllers.clock.ClockRestorer;
 
@@ -47,7 +46,7 @@ import java.util.concurrent.locks.ReentrantLock;
 public class ClockExceptionHandlerTest {
 
     /**
-     * A stub implementation of clock.
+     * A stub implementation of brokenClock.
      */
     private static class ClockStub implements Clock {
 
@@ -59,7 +58,7 @@ public class ClockExceptionHandlerTest {
         }
 
         @Override
-        public void addClockListener(ClockListener listener) {
+        public void shutdown() {
 
         }
 
@@ -74,18 +73,38 @@ public class ClockExceptionHandlerTest {
         }
 
         @Override
-        public void stopClock() throws ClockException {
+        public void stopClock() {
 
         }
 
         @Override
-        public boolean state() throws ClockException {
-            return false;
+        public void pauseClock() {
+
+        }
+
+        @Override
+        public void resumeClock() {
+
+        }
+
+        @Override
+        public ClockState state() {
+            return ClockState.STOPPED;
         }
 
         @Override
         public long getTickDuration(TimeUnit unit) {
             return 0;
+        }
+
+        @Override
+        public ClockListener getClockListener() {
+            return null;
+        }
+
+        @Override
+        public ClockRestorer getClockRestorer() {
+            return null;
         }
     }
 
@@ -123,7 +142,6 @@ public class ClockExceptionHandlerTest {
             this.atomicBoolean = atomicBoolean;
         }
 
-        @Override
         public void exceptionHappened(Clock clock) {
             lock.lock();
             try {
@@ -133,6 +151,11 @@ public class ClockExceptionHandlerTest {
                 lock.unlock();
             }
         }
+
+        @Override
+        public void exceptionHappened(Clock clock, Throwable exception) {
+
+        }
     }
 
     /**
@@ -141,7 +164,7 @@ public class ClockExceptionHandlerTest {
     private ExecutorService service;
 
     /**
-     * The clock the tests use.
+     * The brokenClock the tests use.
      */
     private Clock clock;
 
@@ -168,7 +191,7 @@ public class ClockExceptionHandlerTest {
     /**
      * An empty ClockRestorer.
      */
-    private final ClockRestorer emptyRestorer = cl -> { };
+    private final ClockRestorer emptyRestorer = (cl, ex) -> { };
 
     /**
      * A ClockExceptionHandler using the mockRestorer.
